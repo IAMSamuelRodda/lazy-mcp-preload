@@ -45,7 +45,15 @@
 
 ## Known Issues
 
-*None currently - awaiting first test*
+*None currently*
+
+### Recently Fixed
+
+**Pydantic params wrapper issue (2025-11-27)**
+- **Symptom:** First MCP tool call fails with `params Field required` validation error, retry succeeds
+- **Root cause:** Python MCP servers using Pydantic expect args wrapped in `params`, Claude passes flat args
+- **Fix:** Auto-wrap detection in `maybeWrapInParams()` - transparent to Claude, zero context bloat
+- **Commit:** `78d95da`
 
 ## Recent Achievements (Last 2 Weeks)
 
@@ -59,6 +67,7 @@
 - **Testing passed** - confirmed ~95% context reduction, zero cold-start latency
 - **Published to GitHub** - https://github.com/iamsamuelrodda/lazy-mcp-preload
 - **Posted to issue #3036** - shared with community
+- **Fixed Pydantic params issue** - auto-wrap args when schema requires `params` wrapper
 
 ## Next Steps (Prioritized)
 
