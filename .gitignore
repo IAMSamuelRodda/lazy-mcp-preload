@@ -1,0 +1,31 @@
+# Build output
+build/
+dist/
+
+# Dependencies
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Upstream reference (not needed in distribution)
+upstream-lazy-mcp/
+
+# Deploy output (generated)
+deploy/hierarchy/
+
+# Test output
+*.test
+coverage.out
+coverage.html
+
+# Logs
+*.log
