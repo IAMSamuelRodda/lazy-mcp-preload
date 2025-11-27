@@ -37,7 +37,7 @@
 ~/.claude/lazy-mcp/
 ├── mcp-proxy          # Go binary
 ├── config.json        # preloadAll: true enabled
-└── hierarchy/         # Tool schemas (29 tools across 3 servers)
+└── hierarchy/         # Tool schemas (30 tools across 3 servers)
     ├── joplin/
     ├── todoist/
     └── nextcloud-calendar/
@@ -62,12 +62,13 @@
 - Added `preloadAll` config option
 - Implemented `PreloadServers()` with parallel goroutines
 - Built and deployed to ~/.claude/lazy-mcp/
-- Generated hierarchy for 3 MCP servers (29 tools)
+- Generated hierarchy for 3 MCP servers (30 tools)
 - Updated ~/.claude.json to use proxy
 - **Testing passed** - confirmed ~95% context reduction, zero cold-start latency
 - **Published to GitHub** - https://github.com/iamsamuelrodda/lazy-mcp-preload
 - **Posted to issue #3036** - shared with community
 - **Fixed Pydantic params issue** - auto-wrap args when schema requires `params` wrapper
+- **Added joplin_ensure_running tool** - proactive warmup for Joplin with polling until API ready
 
 ## Next Steps (Prioritized)
 
