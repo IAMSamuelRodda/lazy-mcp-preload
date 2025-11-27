@@ -22,62 +22,55 @@ This fork adds a `preloadAll` option that starts all configured MCP servers in t
 
 ### Prerequisites
 
-```bash
-# Install Go 1.21+
-sudo apt install golang-go
-# Or use the install script
-./scripts/install-go.sh
-```
+- Go 1.21+ (`sudo apt install golang-go` or use `./scripts/install-go.sh`)
+- Your existing MCP servers configured and working
 
-### Build
+### Quick Start
 
 ```bash
-git clone https://github.com/x-forge/lazy-mcp-preload.git
+# Clone the repository
+git clone https://github.com/iamsamuelrodda/lazy-mcp-preload.git
 cd lazy-mcp-preload
+
+# Build the proxy
 make build
-```
 
-### Deploy to Claude Code
+# Generate tool hierarchy from your existing MCP servers
+make generate-hierarchy
 
-```bash
-./scripts/deploy.sh
+# Deploy to ~/.claude/lazy-mcp/
+make deploy
 ```
 
 ## Configuration
 
-### config.json
+### 1. Create config.json
+
+Copy the example and customize for your MCP servers:
+
+```bash
+cp config/config.json.example config/config.json
+```
+
+Edit `config/config.json`:
 
 ```json
 {
   "mcpProxy": {
-    "name": "x-forge MCP Proxy",
+    "name": "MCP Proxy",
     "version": "1.0.0",
     "type": "stdio",
-    "hierarchyPath": "/home/x-forge/.claude/lazy-mcp/hierarchy",
+    "hierarchyPath": "~/.claude/lazy-mcp/hierarchy",
     "options": {
       "lazyLoad": true,
       "preloadAll": true
     }
   },
   "mcpServers": {
-    "joplin": {
+    "your-server-name": {
       "transportType": "stdio",
-      "command": "/home/x-forge/.claude/mcp-servers/joplin/.venv/bin/python",
-      "args": ["/home/x-forge/.claude/mcp-servers/joplin/joplin_mcp.py"],
-      "env": {},
-      "options": { "lazyLoad": true }
-    },
-    "todoist": {
-      "transportType": "stdio",
-      "command": "/home/x-forge/.claude/mcp-servers/todoist/.venv/bin/python",
-      "args": ["/home/x-forge/.claude/mcp-servers/todoist/todoist_mcp.py"],
-      "env": {},
-      "options": { "lazyLoad": true }
-    },
-    "nextcloud-calendar": {
-      "transportType": "stdio",
-      "command": "/home/x-forge/.claude/mcp-servers/nextcloud-calendar/.venv/bin/python",
-      "args": ["/home/x-forge/.claude/mcp-servers/nextcloud-calendar/nextcloud_calendar_mcp.py"],
+      "command": "python",
+      "args": ["/path/to/your/mcp_server.py"],
       "env": {},
       "options": { "lazyLoad": true }
     }
@@ -85,21 +78,27 @@ make build
 }
 ```
 
-### Claude Code Integration
+**Key options:**
+- `lazyLoad: true` - Only load tool schemas on-demand (reduces context)
+- `preloadAll: true` - Pre-warm all servers in background (eliminates cold start)
 
-After deployment, your `~/.claude.json` will contain:
+### 2. Update Claude Code Configuration
+
+Add to your `~/.claude.json`:
 
 ```json
 {
   "mcpServers": {
     "lazy-mcp": {
       "type": "stdio",
-      "command": "/home/x-forge/.claude/lazy-mcp/mcp-proxy",
-      "args": ["--config", "/home/x-forge/.claude/lazy-mcp/config.json"]
+      "command": "~/.claude/lazy-mcp/mcp-proxy",
+      "args": ["--config", "~/.claude/lazy-mcp/config.json"]
     }
   }
 }
 ```
+
+**Important:** Remove your original MCP server entries from `~/.claude.json` - the proxy handles them now.
 
 ## How Preloading Works
 
@@ -148,41 +147,51 @@ After deployment, your `~/.claude.json` will contain:
 lazy-mcp-preload/
 ├── README.md
 ├── Makefile
-├── go.mod
-├── go.sum
-├── cmd/
-│   └── mcp-proxy/
-│       └── main.go
-├── internal/
-│   ├── client/
-│   ├── config/
-│   ├── hierarchy/
-│   └── server/
-├── config/
-│   └── config.json.example
-├── scripts/
-│   ├── install-go.sh
-│   ├── deploy.sh
-│   └── generate-hierarchy.sh
-└── deploy/
-    └── hierarchy/          # Generated tool hierarchy
+├── go.mod / go.sum
+├── cmd/mcp-proxy/         # Main entry point
+├── internal/              # Core implementation
+│   ├── client/            # MCP client connections
+│   ├── config/            # Configuration parsing
+│   ├── hierarchy/         # Tool schema management
+│   └── server/            # Proxy server logic
+├── config/                # Example configurations
+├── scripts/               # Build & deploy scripts
+├── structure_generator/   # Python tool for generating hierarchy
+└── deploy/hierarchy/      # Generated tool schemas
 ```
 
 ### Making Changes
 
-1. Edit source in `internal/` or `cmd/`
-2. Build: `make build`
-3. Test locally: `./build/mcp-proxy --config config/config.json`
-4. Deploy: `make deploy`
+```bash
+# Edit source in internal/ or cmd/
+make build                                    # Rebuild
+./build/mcp-proxy --config config/config.json # Test locally
+make deploy                                   # Deploy to ~/.claude/lazy-mcp/
+```
+
+### Generating Tool Hierarchy
+
+The hierarchy generator introspects your MCP servers and creates JSON schemas:
+
+```bash
+cd structure_generator
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python generate_hierarchy.py --config ../config/config.json --output ../deploy/hierarchy
+```
 
 ## Upstream
 
-This is a fork of [voicetreelab/lazy-mcp](https://github.com/voicetreelab/lazy-mcp).
+Fork of [voicetreelab/lazy-mcp](https://github.com/voicetreelab/lazy-mcp).
 
-Changes from upstream:
-- Added `preloadAll` option for background server initialization
-- Added deployment scripts for Claude Code integration
-- Customized for x-forge MCP server setup
+**Changes from upstream:**
+- Added `preloadAll` config option for background server initialization
+- Servers start in parallel goroutines immediately at proxy startup
+- Added deployment scripts and hierarchy generator for Claude Code
+
+## Contributing
+
+Contributions welcome! This project addresses [anthropics/claude-code#3036](https://github.com/anthropics/claude-code/issues/3036).
 
 ## License
 
