@@ -1,3 +1,0 @@
-{
-  "overview": "cloudflare: 6 tools; cloudflare_create_dns_record -\u003e Create a new DNS record in a zone.\n\n    Args:\n        params: CreateDNSRecordInput with record de..., cloudflare_delete_dns_record -\u003e Delete a DNS record., cloudflare_get_zone -\u003e Get details for a specific Cloudflare zone by name or ID.\n\n    Args:\n        params: GetZoneInput..., cloudflare_list_dns_records -\u003e List DNS records for a zone., cloudflare_list_zones -\u003e List all zones (domains) in your Cloudflare account.\n\n    Returns zone names, IDs, status, and nameservers., cloudflare_update_dns_record -\u003e Update an existing DNS record."
-}

@@ -1,0 +1,14 @@
+{
+  "name": "get_data",
+  "description": "Retrieve data from the service",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "The ID of the data to retrieve"
+      }
+    },
+    "required": ["id"]
+  }
+}

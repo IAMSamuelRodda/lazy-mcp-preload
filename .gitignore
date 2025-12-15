@@ -19,7 +19,8 @@ Thumbs.db
 # Upstream reference (not needed in distribution)
 upstream-lazy-mcp/
 
-# Deploy output - hierarchy is tracked (contains tool definitions for all servers)
+# Generated hierarchy (personal tool definitions)
+deploy/hierarchy/
 
 # Test output
 *.test
@@ -29,9 +30,9 @@ coverage.html
 # Logs
 *.log
 
-# Local config overrides (may contain credentials)
+# Personal configs (use config.json.example as template)
+config/config.json
 config/*.local.json
-**/config.local.json
 .env
 .env.*
 !.env.example

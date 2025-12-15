@@ -1,3 +1,0 @@
-{
-  "overview": "youtube-transcript: 3 tools; get_timed_transcript -\u003e \n    Get the transcript of a YouTube video with timestamps.\n\n    Returns each segment with its st..., get_transcript -\u003e \n    Get the plain text transcript of a YouTube video.\n\n    Returns the full transcript as contin..., get_video_info -\u003e \n    Get available transcript languages and metadata for a YouTube video.\n\n    Returns list of av..."
-}

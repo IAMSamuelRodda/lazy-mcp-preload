@@ -1,0 +1,3 @@
+{
+  "overview": "example-server: 3 tools; get_data -> Retrieve data from the service, create_item -> Create a new item, delete_item -> Delete an existing item"
+}
