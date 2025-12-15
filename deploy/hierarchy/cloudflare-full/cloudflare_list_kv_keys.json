@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_list_kv_keys": {
+      "description": "List keys in KV namespace with optional prefix filter.\n\n    Returns all keys stored in the KV namespace. Use prefix parameter to\n    filter keys starting with a specific string.\n\n    Args:\n        params: ListKVKeysInput with namespace ID, optional prefix, and limit\n\n    Returns:\n        List of keys in the namespace\n    ",
+      "maps_to": "cloudflare_list_kv_keys",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/ListKVKeysInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

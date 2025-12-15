@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "jmap_get_email": {
+      "description": "\n    Get full email content by ID. Returns headers, body, and attachments.\n\n    Use email IDs from jmap_search_emails to retrieve full content.\n    Includes plain text body, HTML body info, and attachment list.\n\n    Args:\n        params: JmapGetEmailInput containing:\n            - email_id: Email ID to retrieve (required)\n            - account: Email account (optional)\n            - include_body: Include full body content (default True)\n            - response_format: 'markdown' or 'json'\n\n    Returns:\n        Full email content with headers and body.\n    ",
+      "maps_to": "jmap_get_email",
+      "server": "stalwart",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/JmapGetEmailInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

@@ -1,8 +1,20 @@
 {
-  "name": "get_transcript",
-  "description": "Get the plain text transcript of a YouTube video. Returns full transcript as continuous text without timestamps.",
-  "parameters": {
-    "video_url": "YouTube video URL or video ID (required)",
-    "language": "Language code e.g. 'en', 'es' (optional, auto-detects)"
+  "tools": {
+    "get_transcript": {
+      "description": "\n    Get the plain text transcript of a YouTube video.\n\n    Returns the full transcript as continuous text without timestamps.\n    Useful for summarization, analysis, or when timing isn't needed.\n    ",
+      "maps_to": "get_transcript",
+      "server": "youtube-transcript",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/TranscriptInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
   }
 }

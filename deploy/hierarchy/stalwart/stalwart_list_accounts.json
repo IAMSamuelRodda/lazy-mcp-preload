@@ -1,24 +1,19 @@
 {
   "tools": {
     "stalwart_list_accounts": {
-      "description": "List accounts (users, groups, domains). Filter by type or name text.\n\nUse to find account names for other operations. Returns usernames, emails, and account types.",
+      "description": "\n    List accounts (users, groups, domains). Filter by type or name text.\n\n    Use to find account names for other operations. Returns usernames, emails,\n    and account types. Filter by 'individual' for users, 'group' for groups.\n\n    Args:\n        params: ListAccountsInput containing:\n            - account_type: Filter by type (default: individual)\n            - filter_text: Filter by name/email containing text\n            - limit: Maximum results (default: 50)\n            - response_format: 'markdown' or 'json'\n\n    Returns:\n        List of accounts with names and details.\n    ",
       "maps_to": "stalwart_list_accounts",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "account_type": { "type": "string", "enum": ["individual", "group", "domain", "tenant", "apiKey", "oauthClient", "list", "resource", "location", "other"], "description": "Type of accounts to list" },
-              "filter_text": { "type": "string", "description": "Filter by name/email containing text" },
-              "limit": { "type": "integer", "default": 50, "description": "Maximum accounts to return" },
-              "response_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
-            }
+            "$ref": "#/$defs/ListAccountsInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

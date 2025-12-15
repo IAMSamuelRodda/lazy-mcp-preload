@@ -1,20 +1,19 @@
 {
   "tools": {
     "mailjet_get_account_info": {
-      "description": "Get account info (username, timezone, daily/monthly limits).\n\nRetrieve your Mailjet account profile including contact information,\ntimezone, email sending quotas, and usage limits.",
+      "description": "Get account info (username, timezone, daily/monthly limits).\n\n    Retrieve your Mailjet account profile including contact information,\n    timezone, email sending quotas, and usage limits.\n\n    Args:\n        params (GetAccountInfoInput): Input containing:\n            - response_format (str): 'markdown' or 'json'\n\n    Returns:\n        str: Account details including email limits and usage\n    ",
       "maps_to": "mailjet_get_account_info",
-      "server": "mailjet",
+      "server": "mailjet_mcp",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "response_format": {
-            "type": "string",
-            "enum": ["markdown", "json"],
-            "description": "Output format: 'markdown' or 'json'"
+          "params": {
+            "$ref": "#/$defs/GetAccountInfoInput"
           }
         },
-        "required": [],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

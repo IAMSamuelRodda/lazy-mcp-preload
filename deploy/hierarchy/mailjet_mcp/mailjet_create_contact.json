@@ -1,28 +1,19 @@
 {
   "tools": {
     "mailjet_create_contact": {
-      "description": "Create contact (with optional name and exclusion status).\n\nAdd a new contact to your Mailjet account with optional metadata.\nContacts can be excluded from campaigns at creation time.",
+      "description": "Create contact (with optional name and exclusion status).\n\n    Add a new contact to your Mailjet account with optional metadata.\n    Contacts can be excluded from campaigns at creation time.\n\n    Args:\n        params (CreateContactInput): Input containing:\n            - email (str): Contact email address\n            - name (str, optional): Contact name\n            - is_excluded (bool): Whether to exclude from campaigns\n\n    Returns:\n        str: Created contact details with ID\n    ",
       "maps_to": "mailjet_create_contact",
-      "server": "mailjet",
+      "server": "mailjet_mcp",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "email": {
-            "type": "string",
-            "description": "Contact email address",
-            "pattern": "^[\\w\\.-]+@[\\w\\.-]+\\.\\w+$"
-          },
-          "name": {
-            "type": "string",
-            "description": "Contact name"
-          },
-          "is_excluded": {
-            "type": "boolean",
-            "description": "Whether contact is excluded from sending"
+          "params": {
+            "$ref": "#/$defs/CreateContactInput"
           }
         },
-        "required": ["email"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

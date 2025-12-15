@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_delete_page_rule": {
+      "description": "Delete page rule. Irreversible - use list_page_rules first.\n\n    Args:\n        params: DeletePageRuleInput with zone and rule ID\n\n    Returns:\n        Confirmation of deletion\n    ",
+      "maps_to": "cloudflare_delete_page_rule",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/DeletePageRuleInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

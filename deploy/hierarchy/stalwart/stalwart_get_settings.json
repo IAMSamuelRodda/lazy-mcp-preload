@@ -1,22 +1,19 @@
 {
   "tools": {
     "stalwart_get_settings": {
-      "description": "Get server configuration settings. Filter by key prefix.\n\nUse prefix like 'server.' or 'queue.' to narrow results.",
+      "description": "\n    Get server configuration settings. Filter by key prefix if needed.\n\n    Returns all or filtered settings. Use prefix like 'server.' or 'queue.'\n    to narrow results.\n\n    Args:\n        params: GetSettingsInput containing:\n            - prefix: Filter by key prefix (optional)\n            - response_format: 'markdown' or 'json'\n\n    Returns:\n        Server settings matching the criteria.\n    ",
       "maps_to": "stalwart_get_settings",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "prefix": { "type": "string", "description": "Settings key prefix filter" },
-              "response_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
-            }
+            "$ref": "#/$defs/GetSettingsInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

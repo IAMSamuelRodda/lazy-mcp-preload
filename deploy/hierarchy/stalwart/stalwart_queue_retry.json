@@ -1,22 +1,19 @@
 {
   "tools": {
     "stalwart_queue_retry": {
-      "description": "Force immediate retry of queued message. Reschedules for immediate delivery.",
+      "description": "\n    Force immediate retry of queued message. Reschedules for immediate delivery.\n\n    Use to retry a failed message without waiting for next scheduled attempt.\n\n    Args:\n        params: QueueMessageActionInput containing:\n            - message_id: Queue message ID (required)\n\n    Returns:\n        Confirmation that message was rescheduled.\n    ",
       "maps_to": "stalwart_queue_retry",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "message_id": { "type": "string", "description": "Queue message ID" }
-            },
-            "required": ["message_id"]
+            "$ref": "#/$defs/QueueMessageActionInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

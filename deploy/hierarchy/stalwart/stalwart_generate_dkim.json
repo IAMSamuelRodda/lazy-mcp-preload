@@ -1,23 +1,19 @@
 {
   "tools": {
     "stalwart_generate_dkim": {
-      "description": "Generate new DKIM signing key for domain. Returns DNS TXT record.\n\nUse sparingly - regenerating invalidates existing signatures.",
+      "description": "\n    Generate new DKIM signing key for domain. Returns DNS TXT record to add.\n\n    Creates a new DKIM key pair. The public key must be added to DNS.\n    Use sparingly - regenerating invalidates existing DKIM signatures.\n\n    Args:\n        params: GetDNSRecordsInput containing:\n            - domain: Domain name (required)\n            - response_format: 'markdown' or 'json'\n\n    Returns:\n        DKIM public key to add as DNS TXT record.\n    ",
       "maps_to": "stalwart_generate_dkim",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "domain": { "type": "string", "description": "Domain name" },
-              "response_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
-            },
-            "required": ["domain"]
+            "$ref": "#/$defs/GetDNSRecordsInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

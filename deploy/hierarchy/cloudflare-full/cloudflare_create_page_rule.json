@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_create_page_rule": {
+      "description": "Create page rule for URL pattern with caching, redirects, or security actions.\n\n    Page rules customize Cloudflare behavior for specific URL patterns. Common uses\n    include cache everything, forwarding URLs, SSL enforcement, and security levels.\n\n    Args:\n        params: CreatePageRuleInput with URL pattern and actions\n\n    Returns:\n        Created page rule details including rule ID\n\n    Example actions:\n        - Cache everything: [{\"id\": \"cache_level\", \"value\": \"cache_everything\"}]\n        - Force HTTPS: [{\"id\": \"always_use_https\"}]\n        - Forwarding: [{\"id\": \"forwarding_url\", \"value\": {\"url\": \"https://new.com\", \"status_code\": 301}}]\n    ",
+      "maps_to": "cloudflare_create_page_rule",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/CreatePageRuleInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

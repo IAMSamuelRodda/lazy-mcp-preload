@@ -1,22 +1,19 @@
 {
   "tools": {
     "stalwart_queue_delete": {
-      "description": "Delete message from queue permanently. Cancels delivery, cannot undo.",
+      "description": "\n    Delete message from queue permanently. Cancels delivery, cannot undo.\n\n    Use to remove stuck messages or cancel unwanted outgoing mail.\n\n    Args:\n        params: QueueMessageActionInput containing:\n            - message_id: Queue message ID (required)\n\n    Returns:\n        Confirmation that message was deleted.\n    ",
       "maps_to": "stalwart_queue_delete",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "message_id": { "type": "string", "description": "Queue message ID" }
-            },
-            "required": ["message_id"]
+            "$ref": "#/$defs/QueueMessageActionInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

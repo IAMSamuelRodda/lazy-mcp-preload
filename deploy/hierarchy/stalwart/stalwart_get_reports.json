@@ -1,23 +1,19 @@
 {
   "tools": {
     "stalwart_get_reports": {
-      "description": "Get DMARC, TLS, or ARF reports. Shows authentication failures.\n\nUse to review email authentication issues.",
+      "description": "\n    Get DMARC, TLS, or ARF reports. Shows authentication and delivery issues.\n\n    Use to review email authentication failures and delivery problems.\n    DMARC reports show SPF/DKIM alignment issues.\n\n    Args:\n        params: GetReportsInput containing:\n            - report_type: 'dmarc', 'tls', or 'arf' (default: dmarc)\n            - limit: Maximum reports (default: 20)\n            - response_format: 'markdown' or 'json'\n\n    Returns:\n        Email reports of the specified type.\n    ",
       "maps_to": "stalwart_get_reports",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "report_type": { "type": "string", "enum": ["dmarc", "tls", "arf"], "default": "dmarc" },
-              "limit": { "type": "integer", "default": 20, "description": "Maximum reports" },
-              "response_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
-            }
+            "$ref": "#/$defs/GetReportsInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

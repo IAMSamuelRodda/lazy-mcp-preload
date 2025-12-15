@@ -1,38 +1,19 @@
 {
   "tools": {
     "cloudflare_list_zones": {
-      "description": "List all zones (domains) in your Cloudflare account.\n\nReturns zone names, IDs, status, and nameservers. Use zone IDs for other operations.",
+      "description": "List all zones (domains) in your Cloudflare account.\n\n    Returns zone names, IDs, status, and nameservers. Use zone IDs for other operations.\n\n    Args:\n        params: ListZonesInput containing optional filters and pagination\n\n    Returns:\n        List of zones with IDs needed for DNS operations\n    ",
       "maps_to": "cloudflare_list_zones",
       "server": "cloudflare",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "Filter by zone name (e.g., 'example.com')"
-          },
-          "page": {
-            "type": "integer",
-            "description": "Page number",
-            "default": 1,
-            "minimum": 1
-          },
-          "per_page": {
-            "type": "integer",
-            "description": "Results per page",
-            "default": 50,
-            "minimum": 1,
-            "maximum": 100
-          },
-          "response_format": {
-            "type": "string",
-            "enum": ["markdown", "json"],
-            "description": "Output format",
-            "default": "markdown"
+          "params": {
+            "$ref": "#/$defs/ListZonesInput"
           }
         },
-        "required": [],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

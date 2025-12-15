@@ -1,3 +1,3 @@
 {
-  "overview": "visual-to-code: 3 tools; ensure_delegation_ready -> Check parent monitoring (warmup), generate_code_from_image -> Generate HTML/Tailwind from design image (NO API costs), generate_variants -> Create 2-6 variants"
+  "overview": "visual-to-code: 3 tools; ensure_delegation_ready -\u003e Ensure parent monitoring system is running and ready (WARMUP TOOL).\n\n    Use proactively before generation tasks to verify parent agent monitoring\n    is active., generate_code_from_image -\u003e Generate HTML/Tailwind code from design image via parent agent delegation (NO API COSTS).\n\n    This tool delegates to the parent Claude Code agent to process the image using\n    YOUR session's vision capability., generate_variants -\u003e Generate multiple code variants via parent agent delegation (NO API COSTS).\n\n    Creates 2-6 variants with different temperatures (0.7-1.0+) by delegating each\n    to the parent Claude Code agent."
 }

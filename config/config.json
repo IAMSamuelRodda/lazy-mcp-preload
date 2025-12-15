@@ -1,0 +1,89 @@
+{
+  "mcpProxy": {
+    "name": "x-forge MCP Proxy",
+    "version": "1.0.0",
+    "type": "stdio",
+    "hierarchyPath": "/home/x-forge/.claude/lazy-mcp/hierarchy",
+    "options": {
+      "lazyLoad": true,
+      "preloadAll": true
+    }
+  },
+  "mcpServers": {
+    "joplin": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/joplin/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/joplin/joplin_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "todoist": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/todoist/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/todoist/todoist_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "nextcloud-calendar": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/nextcloud-calendar/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/nextcloud-calendar/nextcloud_calendar_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "cloudflare": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/cloudflare/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/cloudflare/cloudflare_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "cloudflare-full": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/cloudflare/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/cloudflare/cloudflare_mcp_full.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "mailjet_mcp": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/mailjet/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/mailjet/mailjet_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "stalwart": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/stalwart/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/stalwart/stalwart_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "tplink-router": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/tplink-router/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/tplink-router/tplink_router_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "visual-to-code": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/visual-to-code/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/visual-to-code/visual_to_code_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "youtube-transcript": {
+      "transportType": "stdio",
+      "command": "/home/x-forge/.claude/mcp-servers/youtube-transcript/.venv/bin/python",
+      "args": ["/home/x-forge/.claude/mcp-servers/youtube-transcript/youtube_transcript_mcp.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+    "context7": {
+      "transportType": "sse",
+      "url": "https://mcp.context7.com/sse",
+      "options": { "lazyLoad": true }
+    }
+  }
+}

@@ -1,17 +1,19 @@
 {
   "tools": {
     "cloudflare_list_workers": {
-      "description": "List deployed Workers scripts with IDs and metadata.\n\nReturns all deployed Workers scripts in the account including script names, creation dates, and route configurations.",
+      "description": "List deployed Workers scripts with IDs and metadata.\n\n    Returns all deployed Workers scripts in the account including script names,\n    creation dates, and route configurations.\n\n    Args:\n        params: ListWorkersInput with pagination options\n\n    Returns:\n        List of Workers scripts with names and deployment info\n    ",
       "maps_to": "cloudflare_list_workers",
       "server": "cloudflare-full",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "page": {"type": "integer", "description": "Page number", "minimum": 1, "default": 1},
-          "per_page": {"type": "integer", "description": "Results per page", "minimum": 1, "maximum": 100, "default": 50},
-          "response_format": {"type": "string", "enum": ["markdown", "json"], "default": "markdown", "description": "Output format"}
+          "params": {
+            "$ref": "#/$defs/ListWorkersInput"
+          }
         },
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

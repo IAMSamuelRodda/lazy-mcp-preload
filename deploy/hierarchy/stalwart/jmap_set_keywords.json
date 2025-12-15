@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "jmap_set_keywords": {
+      "description": "\n    Set email flags (read, flagged, etc). Add or remove keywords.\n\n    Keywords: $seen (read), $flagged (starred), $answered, $draft.\n    Use add_keywords to mark read, remove_keywords to mark unread.\n\n    Args:\n        params: JmapSetKeywordsInput containing:\n            - email_ids: List of email IDs to update (required)\n            - add_keywords: Keywords to add (e.g., ['$seen', '$flagged'])\n            - remove_keywords: Keywords to remove (e.g., ['$seen'])\n            - account: Email account (optional)\n\n    Returns:\n        Confirmation of updated emails.\n    ",
+      "maps_to": "jmap_set_keywords",
+      "server": "stalwart",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/JmapSetKeywordsInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

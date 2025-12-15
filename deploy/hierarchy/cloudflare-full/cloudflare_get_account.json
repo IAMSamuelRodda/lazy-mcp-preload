@@ -1,15 +1,19 @@
 {
   "tools": {
     "cloudflare_get_account": {
-      "description": "Get account details including name, settings, and capabilities.\n\nReturns comprehensive account information including account ID, name, type, and configured settings.",
+      "description": "Get account details including name, settings, and capabilities.\n\n    Returns comprehensive account information including account ID, name, type,\n    and configured settings.\n\n    Args:\n        params: GetAccountInput with response format\n\n    Returns:\n        Account details and configuration\n    ",
       "maps_to": "cloudflare_get_account",
       "server": "cloudflare-full",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "response_format": {"type": "string", "enum": ["markdown", "json"], "default": "markdown", "description": "Output format"}
+          "params": {
+            "$ref": "#/$defs/GetAccountInput"
+          }
         },
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

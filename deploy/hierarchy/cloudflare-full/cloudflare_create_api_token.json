@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_create_api_token": {
+      "description": "Create scoped Cloudflare API token programmatically.\n\n    Creates a new API token with specific permissions. Use this to create properly\n    scoped tokens, then replace Global API Key for better security.\n\n    Common permission groups:\n    - 'dns_write': DNS record management\n    - 'workers_write': Workers script deployment\n    - 'workers_kv_write': KV storage management\n    - 'firewall_write': Firewall rule management\n    - 'cache_purge': Cache purging\n    - 'zone_settings_write': Zone configuration\n    - 'analytics_read': Analytics access\n\n    Args:\n        params: CreateAPITokenInput with token name, permissions, and resources\n\n    Returns:\n        New API token value (COPY IMMEDIATELY - shown only once)\n\n    Examples:\n        - MCP full token: permissions=['dns_write', 'workers_write', 'cache_purge',\n          'firewall_write', 'zone_settings_write'], zone_resources='all'\n        - DNS-only token: permissions=['dns_write'], zone_resources='all'\n    ",
+      "maps_to": "cloudflare_create_api_token",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/CreateAPITokenInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

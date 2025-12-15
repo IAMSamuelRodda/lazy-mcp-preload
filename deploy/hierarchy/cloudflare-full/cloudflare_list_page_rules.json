@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_list_page_rules": {
+      "description": "List page rules with URL patterns, actions, and IDs.\n\n    Returns all configured page rules for a zone including URL patterns,\n    actions (caching, redirects, security), and rule IDs for management.\n\n    Args:\n        params: ListPageRulesInput with zone\n\n    Returns:\n        List of page rules with patterns, actions, and management IDs\n    ",
+      "maps_to": "cloudflare_list_page_rules",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/ListPageRulesInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_delete_worker": {
+      "description": "Delete Worker script. Irreversible - use list_workers first.\n\n    Removes the Worker script from Cloudflare's edge network. Routes associated\n    with this script will stop working.\n\n    Args:\n        params: DeleteWorkerInput with script name\n\n    Returns:\n        Confirmation of deletion\n    ",
+      "maps_to": "cloudflare_delete_worker",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/DeleteWorkerInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

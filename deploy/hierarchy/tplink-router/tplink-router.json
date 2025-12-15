@@ -1,3 +1,3 @@
 {
-  "overview": "tplink-router: 3 tools; tplink_list_devices -> List connected devices with IPs/MACs, tplink_list_reservations -> Show DHCP static IP reservations, tplink_get_status -> Router health and network overview"
+  "overview": "tplink-router: 3 tools; tplink_get_status -\u003e Get router status including WAN, WiFi, and device counts.\n\n    Provides overview of router health..., tplink_list_devices -\u003e List all devices connected to the router with IPs and MACs.\n\n    Shows currently connected devices including hostnames, IP addresses,\n    MAC addresses, and connection type (wired/wireless)., tplink_list_reservations -\u003e List all DHCP address reservations (static IPs).\n\n    Shows devices with reserved/static IP addre..."
 }

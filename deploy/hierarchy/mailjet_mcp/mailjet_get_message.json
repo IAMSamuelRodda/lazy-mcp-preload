@@ -1,24 +1,19 @@
 {
   "tools": {
     "mailjet_get_message": {
-      "description": "Get message details (status, delivery, tracking).\n\nRetrieve complete details of a specific sent message including\nstatus, recipient, delivery timestamp, and tracking information.",
+      "description": "Get message details (status, delivery, tracking).\n\n    Retrieve complete details of a specific sent message including\n    status, recipient, delivery timestamp, and tracking information.\n\n    Args:\n        params (GetMessageInput): Input containing:\n            - message_id (str): Mailjet message ID\n            - response_format (str): 'markdown' or 'json'\n\n    Returns:\n        str: Message details including status, recipient, timestamps\n    ",
       "maps_to": "mailjet_get_message",
-      "server": "mailjet",
+      "server": "mailjet_mcp",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "message_id": {
-            "type": "string",
-            "description": "Mailjet message ID to retrieve"
-          },
-          "response_format": {
-            "type": "string",
-            "enum": ["markdown", "json"],
-            "description": "Output format: 'markdown' or 'json'"
+          "params": {
+            "$ref": "#/$defs/GetMessageInput"
           }
         },
-        "required": ["message_id"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

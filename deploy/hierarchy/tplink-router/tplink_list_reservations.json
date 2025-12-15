@@ -1,20 +1,19 @@
 {
   "tools": {
     "tplink_list_reservations": {
-      "description": "List DHCP reservations (static IPs) configured on router. Shows MAC-to-IP bindings for documenting and verifying static assignments.",
+      "description": "List all DHCP address reservations (static IPs).\n\n    Shows devices with reserved/static IP addresses configured in the router.\n    Use this to verify reservations, check for conflicts, and document\n    the network's static IP assignments.\n\n    Args:\n        params: Input parameters with response format option.\n\n    Returns:\n        DHCP reservations list in requested format.\n    ",
       "maps_to": "tplink_list_reservations",
       "server": "tplink-router",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "response_format": {
-            "type": "string",
-            "enum": ["markdown", "json"],
-            "default": "markdown",
-            "description": "Output format: 'markdown' for readable or 'json' for data"
+          "params": {
+            "$ref": "#/$defs/ListReservationsInput"
           }
         },
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

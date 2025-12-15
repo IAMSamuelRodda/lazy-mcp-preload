@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "jmap_move_emails": {
+      "description": "\n    Move emails to folder. Specify destination by name or ID.\n\n    Use mailbox names like 'trash', 'archive', 'inbox' or IDs from\n    jmap_list_mailboxes. Moves all specified emails in batch.\n\n    Args:\n        params: JmapMoveEmailsInput containing:\n            - email_ids: List of email IDs to move (required)\n            - mailbox: Destination folder name or ID (required)\n            - account: Email account (optional)\n\n    Returns:\n        Confirmation of moved emails.\n    ",
+      "maps_to": "jmap_move_emails",
+      "server": "stalwart",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/JmapMoveEmailsInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

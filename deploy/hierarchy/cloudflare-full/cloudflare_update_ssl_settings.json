@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_update_ssl_settings": {
+      "description": "Modify SSL mode (off, flexible, full, strict).\n\n    Changes how Cloudflare connects to your origin server. Use 'strict' for\n    maximum security with valid certificate on origin.\n\n    Args:\n        params: UpdateSSLSettingsInput with zone and SSL mode\n\n    Returns:\n        Updated SSL/TLS settings confirmation\n\n    SSL Modes:\n        - off: No HTTPS encryption between visitors and Cloudflare\n        - flexible: HTTPS between visitors and Cloudflare, HTTP to origin\n        - full: HTTPS to origin, accepts self-signed certificates\n        - strict: HTTPS to origin, requires valid certificate\n    ",
+      "maps_to": "cloudflare_update_ssl_settings",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/UpdateSSLSettingsInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

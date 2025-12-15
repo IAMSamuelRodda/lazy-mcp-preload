@@ -1,24 +1,19 @@
 {
   "tools": {
     "stalwart_list_queue": {
-      "description": "List messages in delivery queue. Filter by sender or recipient.\n\nShows pending messages, delivery attempts, and next retry time.",
+      "description": "\n    List messages in delivery queue. Filter by sender or recipient.\n\n    Shows pending messages, delivery attempts, and next retry time.\n    Use to diagnose delivery issues or monitor queue backlog.\n\n    Args:\n        params: ListQueueInput containing:\n            - limit: Maximum messages (default: 50)\n            - filter_from: Filter by sender (optional)\n            - filter_to: Filter by recipient (optional)\n            - response_format: 'markdown' or 'json'\n\n    Returns:\n        List of queued messages with status.\n    ",
       "maps_to": "stalwart_list_queue",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "limit": { "type": "integer", "default": 50, "description": "Maximum messages" },
-              "filter_from": { "type": "string", "description": "Filter by sender" },
-              "filter_to": { "type": "string", "description": "Filter by recipient" },
-              "response_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
-            }
+            "$ref": "#/$defs/ListQueueInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

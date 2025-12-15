@@ -1,26 +1,19 @@
 {
   "tools": {
     "stalwart_create_account": {
-      "description": "Create email account with password. Set name, email, quota, description.\n\nCreates a new mailbox. Always list accounts first to avoid duplicates.",
+      "description": "\n    Create email account with password. Set name, email, quota, description.\n\n    Creates a new mailbox account. The name becomes the username for login.\n    Always list accounts first to avoid duplicates.\n\n    Args:\n        params: CreateAccountInput containing:\n            - name: Username (required, e.g., 'john')\n            - email: Primary email address (required)\n            - password: Account password (required, min 8 chars)\n            - description: Display name (optional)\n            - quota: Mailbox quota in bytes (optional)\n\n    Returns:\n        Confirmation with account details.\n    ",
       "maps_to": "stalwart_create_account",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string", "description": "Username (e.g., 'john')" },
-              "email": { "type": "string", "description": "Primary email (e.g., 'john@arcforge.au')" },
-              "password": { "type": "string", "description": "Account password (min 8 chars)" },
-              "description": { "type": "string", "description": "Display name" },
-              "quota": { "type": "integer", "description": "Quota in bytes" }
-            },
-            "required": ["name", "email", "password"]
+            "$ref": "#/$defs/CreateAccountInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

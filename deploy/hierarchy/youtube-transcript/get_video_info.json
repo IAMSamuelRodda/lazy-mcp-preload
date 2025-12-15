@@ -1,7 +1,20 @@
 {
-  "name": "get_video_info",
-  "description": "Get available transcript languages (manual and auto-generated) for a YouTube video.",
-  "parameters": {
-    "video_url": "YouTube video URL or video ID (required)"
+  "tools": {
+    "get_video_info": {
+      "description": "\n    Get available transcript languages and metadata for a YouTube video.\n\n    Returns list of available transcript languages (manual and auto-generated).\n    ",
+      "maps_to": "get_video_info",
+      "server": "youtube-transcript",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/VideoInfoInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
   }
 }

@@ -1,26 +1,19 @@
 {
   "tools": {
     "stalwart_update_account": {
-      "description": "Update account settings. Change password, quota, description, add emails.\n\nPartial updates - only provided fields are changed.",
+      "description": "\n    Update account settings. Change password, quota, description, add emails.\n\n    Partial updates supported - only provided fields are changed.\n    Use add_emails to add alias addresses without removing existing ones.\n\n    Args:\n        params: UpdateAccountInput containing:\n            - account_name: Account to update (required)\n            - description: New display name (optional)\n            - password: New password (optional)\n            - quota: New quota in bytes (optional)\n            - add_emails: Additional email aliases (optional)\n\n    Returns:\n        Confirmation that account was updated.\n    ",
       "maps_to": "stalwart_update_account",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "account_name": { "type": "string", "description": "Account to update" },
-              "description": { "type": "string", "description": "New display name" },
-              "password": { "type": "string", "description": "New password" },
-              "quota": { "type": "integer", "description": "New quota in bytes" },
-              "add_emails": { "type": "array", "items": { "type": "string" }, "description": "Email aliases to add" }
-            },
-            "required": ["account_name"]
+            "$ref": "#/$defs/UpdateAccountInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

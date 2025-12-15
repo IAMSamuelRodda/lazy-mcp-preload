@@ -1,22 +1,19 @@
 {
   "tools": {
     "stalwart_delete_account": {
-      "description": "Delete account permanently. Removes mailbox and all data. Cannot undo.",
+      "description": "\n    Delete account permanently. Removes mailbox and all data. Cannot undo.\n\n    Args:\n        params: DeleteAccountInput containing:\n            - account_name: Account to delete (required)\n\n    Returns:\n        Confirmation that account was deleted.\n    ",
       "maps_to": "stalwart_delete_account",
       "server": "stalwart",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "params": {
-            "type": "object",
-            "properties": {
-              "account_name": { "type": "string", "description": "Account to delete" }
-            },
-            "required": ["account_name"]
+            "$ref": "#/$defs/DeleteAccountInput"
           }
         },
-        "required": ["params"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

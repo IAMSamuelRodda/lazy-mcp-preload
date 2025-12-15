@@ -1,19 +1,19 @@
 {
   "tools": {
     "cloudflare_write_kv": {
-      "description": "Write key-value pair to KV namespace with optional TTL.\n\nStores value under key in KV namespace. Overwrites if key exists.",
+      "description": "Write key-value pair to KV namespace with optional TTL.\n\n    Stores a value under a key in the specified KV namespace. If key exists,\n    value is overwritten. Optionally set expiration TTL.\n\n    Args:\n        params: WriteKVInput with namespace ID, key, value, and optional TTL\n\n    Returns:\n        Confirmation of write operation\n    ",
       "maps_to": "cloudflare_write_kv",
       "server": "cloudflare-full",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "namespace_id": {"type": "string", "description": "KV namespace ID", "minLength": 1},
-          "key": {"type": "string", "description": "Key name", "minLength": 1, "maxLength": 512},
-          "value": {"type": "string", "description": "Value to store"},
-          "expiration_ttl": {"type": "integer", "description": "TTL in seconds", "minimum": 60}
+          "params": {
+            "$ref": "#/$defs/WriteKVInput"
+          }
         },
-        "required": ["namespace_id", "key", "value"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

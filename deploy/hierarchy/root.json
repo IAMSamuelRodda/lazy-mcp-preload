@@ -1,3 +1,3 @@
 {
-  "overview": "Root: 3 servers, 30 tools; joplin -\u003e joplin: 11 tools, nextcloud-calendar -\u003e nextcloud-calendar: 7 tools, todoist -\u003e todoist: 12 tools"
+  "overview": "Root: 11 servers, 102 tools; cloudflare -> cloudflare: 6 tools, cloudflare-full -> cloudflare-full: 23 tools, context7 -> context7: 2 tools, joplin -> joplin: 11 tools, mailjet_mcp -> mailjet_mcp: 8 tools, nextcloud-calendar -> nextcloud-calendar: 7 tools, stalwart -> stalwart: 24 tools, todoist -> todoist: 12 tools, tplink-router -> tplink-router: 3 tools, visual-to-code -> visual-to-code: 3 tools, youtube-transcript -> youtube-transcript: 3 tools"
 }

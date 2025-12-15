@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "jmap_search_emails": {
+      "description": "\n    Search emails with filters. Query by text, sender, folder, flags.\n\n    Supports full-text search, mailbox filtering, and keyword filters.\n    Use not_keyword='$seen' to find unread emails.\n\n    Args:\n        params: JmapSearchEmailsInput containing:\n            - account: Email account (optional)\n            - query: Full-text search string\n            - mailbox: Folder name or ID (e.g., 'inbox')\n            - from_address: Filter by sender\n            - to_address: Filter by recipient\n            - subject: Filter by subject text\n            - has_keyword: Must have flag (e.g., '$flagged')\n            - not_keyword: Must not have flag (e.g., '$seen' for unread)\n            - limit: Max results (default 20)\n            - detail: 'minimal', 'standard', or 'full'\n            - response_format: 'markdown' or 'json'\n\n    Returns:\n        List of matching emails with headers and preview.\n    ",
+      "maps_to": "jmap_search_emails",
+      "server": "stalwart",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/JmapSearchEmailsInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

@@ -1,24 +1,19 @@
 {
   "tools": {
     "mailjet_get_statistics": {
-      "description": "Get sending stats (delivered, open/click rates, bounces).\n\nRetrieve email statistics including delivery, open, click, bounce rates\nand engagement metrics for the specified period (up to 90 days).",
+      "description": "Get sending stats (delivered, open/click rates, bounces).\n\n    Retrieve email statistics including delivery, open, click, bounce rates\n    and engagement metrics for the specified period (up to 90 days).\n\n    Args:\n        params (GetStatisticsInput): Input containing:\n            - days (int): Number of days of statistics (1-90, default 7)\n            - response_format (str): 'markdown' or 'json'\n\n    Returns:\n        str: Statistics including delivered, opened, clicked, bounced counts\n    ",
       "maps_to": "mailjet_get_statistics",
-      "server": "mailjet",
+      "server": "mailjet_mcp",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "days": {
-            "type": "integer",
-            "description": "Number of days of statistics (1-90, default 7)"
-          },
-          "response_format": {
-            "type": "string",
-            "enum": ["markdown", "json"],
-            "description": "Output format: 'markdown' or 'json'"
+          "params": {
+            "$ref": "#/$defs/GetStatisticsInput"
           }
         },
-        "required": [],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

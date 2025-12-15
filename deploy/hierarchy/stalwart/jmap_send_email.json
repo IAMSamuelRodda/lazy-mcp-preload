@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "jmap_send_email": {
+      "description": "\n    Send email from account. Compose and deliver immediately.\n\n    Creates and sends email in one operation. Use account parameter\n    to send from specific address when multiple accounts exist.\n\n    Args:\n        params: JmapSendEmailInput containing:\n            - account: Send from this account (optional)\n            - to: List of recipient addresses (required)\n            - subject: Email subject (required)\n            - body: Plain text body (required)\n            - cc: CC recipients (optional)\n            - bcc: BCC recipients (optional)\n            - in_reply_to: Message-ID for threading (optional)\n\n    Returns:\n        Confirmation with sent email ID.\n    ",
+      "maps_to": "jmap_send_email",
+      "server": "stalwart",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/JmapSendEmailInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

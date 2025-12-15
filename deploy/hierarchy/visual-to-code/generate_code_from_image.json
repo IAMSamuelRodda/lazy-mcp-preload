@@ -1,26 +1,19 @@
 {
   "tools": {
     "generate_code_from_image": {
-      "description": "Generate HTML/Tailwind code from design image via delegation (NO API COSTS).\n\nDelegates to parent Claude Code agent which spawns subagent to preserve context. Uses your Max subscription vision capability for free. Achieves 85-90% visual accuracy using exact screenshot-to-code parameters.\n\nProvides complete HTML/Tailwind implementation with CDN libraries, placeholder images, and icons.",
+      "description": "Generate HTML/Tailwind code from design image via parent agent delegation (NO API COSTS).\n\n    This tool delegates to the parent Claude Code agent to process the image using\n    YOUR session's vision capability. Completely free under your Max subscription.\n\n    Uses exact screenshot-to-code parameters for 85-90% visual accuracy:\n    - detail=\"high\" for maximum visual fidelity\n    - Specialized prompts emphasizing \"exactly\"\n\n    Returns file path to generated code with preview and metadata.\n\n    Args:\n        params: GenerateCodeInput with image_path and optional temperature\n\n    Returns:\n        Structured JSON with file path, preview, and metadata\n\n    How it works:\n        1. Tool writes delegation request to /tmp\n        2. Parent Claude Code agent monitors /tmp (needs to be set up)\n        3. Parent spawns subagent to preserve context\n        4. Subagent uses vision to analyze image and generate code\n        5. Parent writes response with generated code\n        6. Tool writes code to file and returns path with preview\n\n    Note: Parent agent must be monitoring for delegation requests and spawn subagents.\n    ",
       "maps_to": "generate_code_from_image",
       "server": "visual-to-code",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "image_path": {
-            "type": "string",
-            "description": "Absolute or relative path to design image file (PNG, JPG, JPEG, WEBP). Examples: 'design.png', '/home/user/designs/mockup.jpg', './wireframe.png'"
-          },
-          "temperature": {
-            "type": "number",
-            "description": "Temperature for generation (0.7=conservative, 1.0=balanced/default, higher=creative). Controls code variation.",
-            "default": 1.0,
-            "minimum": 0.0,
-            "maximum": 2.0
+          "params": {
+            "$ref": "#/$defs/GenerateCodeInput"
           }
         },
-        "required": ["image_path"],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

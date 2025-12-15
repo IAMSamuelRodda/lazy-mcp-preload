@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_read_kv": {
+      "description": "Read value by key from KV namespace.\n\n    Retrieves the value stored under the specified key in the KV namespace.\n\n    Args:\n        params: ReadKVInput with namespace ID and key\n\n    Returns:\n        Value stored at the key\n    ",
+      "maps_to": "cloudflare_read_kv",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/ReadKVInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

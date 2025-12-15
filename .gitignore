@@ -29,13 +29,9 @@ coverage.html
 # Logs
 *.log
 
-# Config files with credentials (NEVER commit real tokens)
-config/config.json
+# Local config overrides (may contain credentials)
 config/*.local.json
 **/config.local.json
 .env
 .env.*
 !.env.example
-
-# Deployed configs (may contain credentials)
-~/.claude/lazy-mcp/config.json

@@ -1,20 +1,19 @@
 {
   "tools": {
     "mailjet_list_senders": {
-      "description": "List verified sender email addresses (status, created).\n\nRetrieve all verified senders in your account that can be used\nas the 'From' address when sending emails.",
+      "description": "List verified sender email addresses (status, created).\n\n    Retrieve all verified senders in your account that can be used\n    as the 'From' address when sending emails.\n\n    Args:\n        params (ListSendersInput): Input containing:\n            - response_format (str): 'markdown' or 'json'\n\n    Returns:\n        str: List of verified senders with status\n    ",
       "maps_to": "mailjet_list_senders",
-      "server": "mailjet",
+      "server": "mailjet_mcp",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "response_format": {
-            "type": "string",
-            "enum": ["markdown", "json"],
-            "description": "Output format: 'markdown' or 'json'"
+          "params": {
+            "$ref": "#/$defs/ListSendersInput"
           }
         },
-        "required": [],
-        "additionalProperties": false
+        "required": [
+          "params"
+        ],
+        "type": "object"
       }
     }
   }

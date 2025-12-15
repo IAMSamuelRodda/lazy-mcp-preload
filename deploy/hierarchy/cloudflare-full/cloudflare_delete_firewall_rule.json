@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "cloudflare_delete_firewall_rule": {
+      "description": "Delete firewall rule. Irreversible - use list_firewall_rules first.\n\n    Args:\n        params: DeleteFirewallRuleInput with zone and rule ID\n\n    Returns:\n        Confirmation of deletion\n    ",
+      "maps_to": "cloudflare_delete_firewall_rule",
+      "server": "cloudflare-full",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/DeleteFirewallRuleInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

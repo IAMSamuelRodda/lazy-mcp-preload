@@ -1,8 +1,20 @@
 {
-  "name": "get_timed_transcript",
-  "description": "Get transcript with timestamps in [MM:SS] format. Useful for referencing specific parts of the video.",
-  "parameters": {
-    "video_url": "YouTube video URL or video ID (required)",
-    "language": "Language code e.g. 'en', 'es' (optional, auto-detects)"
+  "tools": {
+    "get_timed_transcript": {
+      "description": "\n    Get the transcript of a YouTube video with timestamps.\n\n    Returns each segment with its start time in [MM:SS] format.\n    Useful when you need to reference specific parts of the video.\n    ",
+      "maps_to": "get_timed_transcript",
+      "server": "youtube-transcript",
+      "inputSchema": {
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/TimedTranscriptInput"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "type": "object"
+      }
+    }
   }
 }
