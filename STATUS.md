@@ -16,14 +16,14 @@
 
 ## Current Focus
 
-### This Week: Structure Generator Fixes
+### This Week: OpenBao Integration & Graceful Degradation
 
-- [x] Fix nil pointer panic in structure_generator (context7 SSE transport)
-- [x] Add HTTP Streamable transport support (context7 now works)
-- [x] Add environment variable passthrough for stdio servers
-- [x] Fix vikunja timeout (PYTHONPATH not being passed)
-- [x] Update Makefile for direct hierarchy generation (no intermediate deploy/)
-- [x] Update context7 URL from deprecated /sse to /mcp
+- [x] Add OpenBao package (`internal/openbao/`) with health check and auto-start
+- [x] Add OpenBao config options to proxy config
+- [x] Implement graceful server disabling (failed servers don't block proxy)
+- [x] Reduce server init timeout from 30s to 5s for fast-fail
+- [x] Add structured error codes (OPENBAO_AGENT_NOT_RUNNING, SECRET_NOT_FOUND, etc.)
+- [x] Update Python MCP servers with DeferredCredentialLoader pattern
 
 ## Deployment Status
 
@@ -35,23 +35,18 @@
 ## Configuration
 
 ```
+# Deployment
 ~/.claude/lazy-mcp/
-├── mcp-proxy          # Go binary
+├── mcp-proxy          # Go binary (with OpenBao integration)
 ├── config.json        # preloadAll: true enabled (gitignored - personal)
 └── hierarchy/         # Tool schemas (136 tools across 13 servers)
-    ├── cloudflare/ (6)
-    ├── cloudflare-full/ (23)
-    ├── context7/ (2)
-    ├── joplin/ (11)
-    ├── mailjet_mcp/ (8)
-    ├── nextcloud-calendar/ (7)
-    ├── stalwart/ (24)
-    ├── stripe/ (7)
-    ├── todoist/ (12)
-    ├── tplink-router/ (3)
-    ├── vikunja/ (27)
-    ├── visual-to-code/ (3)
-    └── youtube-transcript/ (3)
+
+# Source (internal/)
+├── client/            # MCP client wrappers
+├── config/            # Configuration parsing + OpenBao options
+├── hierarchy/         # Tool hierarchy + graceful server disabling
+├── openbao/           # OpenBao health check, auto-start, error codes
+└── server/            # Stdio/HTTP server startup
 ```
 
 ## Known Issues
@@ -69,11 +64,13 @@
 ## Recent Achievements (Last 2 Weeks)
 
 ### 2025-12-18
+- **OpenBao integration** - Health check, auto-start, graceful degradation
+- **Graceful server disabling** - Failed servers disabled, don't block proxy
+- **Fast-fail detection** - 5s timeout instead of 30s for server init
+- **Structured error codes** - OPENBAO_AGENT_NOT_RUNNING, SECRET_NOT_FOUND, etc.
+- **Python deferred loading** - DeferredCredentialLoader for lifespan-based creds
 - **Fixed structure_generator panic** - context7 SSE transport caused nil pointer
 - **Added multi-transport support** - stdio, SSE, and HTTP Streamable
-- **Fixed env var passthrough** - vikunja now works (PYTHONPATH)
-- **Direct hierarchy generation** - No intermediate deploy/ folder
-- **Full hierarchy** - 13 servers, 136 tools generated successfully
 
 ### 2025-12-16
 - **Security hardening** - STRIDE threat model audit, input validation
@@ -89,9 +86,10 @@
 
 ## Next Steps (Prioritized)
 
-1. **Merge security branch** - Review and merge dev/security-hardening to main
-2. **Monitor feedback** - Watch for issues/improvements on GitHub
-3. **Consider upstream PR** - If voicetreelab/lazy-mcp is active, propose preloadAll feature
+1. **Test OpenBao integration** - Verify graceful degradation with agent on/off
+2. **Update remaining MCP servers** - Apply deferred loading to stalwart, cloudflare, etc.
+3. **Merge security branch** - Review and merge dev/security-hardening to main
+4. **Monitor feedback** - Watch for issues/improvements on GitHub
 
 ## Related Resources
 

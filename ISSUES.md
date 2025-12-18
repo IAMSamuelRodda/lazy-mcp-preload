@@ -86,12 +86,6 @@ Systematic review of 10 other MCP servers (cloudflare, joplin, mailjet, nextclou
 
 ---
 
-## Resolved Issues (Last 2 Weeks)
-
-*None yet*
-
----
-
 ## Archived Issues (Older than 2 Weeks)
 
 *Items will be moved here from Resolved Issues after 2 weeks*
