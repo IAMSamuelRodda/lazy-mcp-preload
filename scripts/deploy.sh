@@ -5,8 +5,8 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-DEPLOY_DIR="/home/x-forge/.claude/lazy-mcp"
-CLAUDE_JSON="/home/x-forge/.claude.json"
+DEPLOY_DIR="/home/samuelrodda/.claude/lazy-mcp"
+CLAUDE_JSON="/home/samuelrodda/.claude.json"
 
 cd "$PROJECT_DIR"
 
@@ -48,7 +48,7 @@ if [ -f "$CLAUDE_JSON" ]; then
 import json
 import sys
 
-config_path = "/home/x-forge/.claude.json"
+config_path = "/home/samuelrodda/.claude.json"
 
 with open(config_path, 'r') as f:
     config = json.load(f)
@@ -67,8 +67,8 @@ for server in servers_to_remove:
 # Add lazy-mcp proxy
 config['mcpServers']['lazy-mcp'] = {
     "type": "stdio",
-    "command": "/home/x-forge/.claude/lazy-mcp/mcp-proxy",
-    "args": ["--config", "/home/x-forge/.claude/lazy-mcp/config.json"]
+    "command": "/home/samuelrodda/.claude/lazy-mcp/mcp-proxy",
+    "args": ["--config", "/home/samuelrodda/.claude/lazy-mcp/config.json"]
 }
 
 with open(config_path, 'w') as f:

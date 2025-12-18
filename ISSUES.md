@@ -62,7 +62,7 @@ The `context7` server was configured with `transportType: "sse"` but had no `com
 - **Priority**: P2
 - **Component**: Vikunja MCP server (not lazy-mcp-preload)
 - **Discovered**: 2025-12-17
-- **Tracking**: `/home/x-forge/repos/3-resources/MCP/vikunja-mcp/ISSUES.md#BUG-001`
+- **Tracking**: `/home/samuelrodda/repos/3-resources/MCP/vikunja-mcp/ISSUES.md#BUG-001`
 
 **Description:**
 Vikunja MCP server shows tool count discrepancy when accessed via lazy-mcp (27 actual vs 23 reported). Systematic review of 10 other MCP servers found NO similar discrepancy, indicating this is specific to vikunja-mcp implementation, not a lazy-mcp-preload bug.
@@ -70,7 +70,7 @@ Vikunja MCP server shows tool count discrepancy when accessed via lazy-mcp (27 a
 **Resolution:**
 Systematic review of 10 other MCP servers (cloudflare, joplin, mailjet, nextcloud-calendar, stalwart, stripe, todoist, tplink-router, youtube-transcript) found all report accurate tool counts. Issue is specific to vikunja-mcp server, not lazy-mcp-preload.
 
-**See:** `/home/x-forge/repos/3-resources/MCP/vikunja-mcp/ISSUES.md#BUG-001` for full investigation and tracking.
+**See:** `/home/samuelrodda/repos/3-resources/MCP/vikunja-mcp/ISSUES.md#BUG-001` for full investigation and tracking.
 
 ---
 

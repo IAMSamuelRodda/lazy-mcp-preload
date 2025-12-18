@@ -2,7 +2,7 @@
 
 > **Purpose:** Document systematic review of all MCP servers for OpenBao integration status and tool count accuracy
 > **Date:** 2025-12-17
-> **Scope:** All MCP servers in `/home/x-forge/repos/3-resources/MCP`
+> **Scope:** All MCP servers in `/home/samuelrodda/repos/3-resources/MCP`
 
 ---
 
@@ -43,13 +43,13 @@
 ### Servers WITH OpenBao (2)
 
 1. **joplin-mcp** ✅
-   - Location: `/home/x-forge/repos/3-resources/MCP/joplin-mcp/joplin_mcp.py`
+   - Location: `/home/samuelrodda/repos/3-resources/MCP/joplin-mcp/joplin_mcp.py`
    - Pattern: Arc Forge secret path pattern
    - Implementation: Complete with dev fallback
    - Tools: 11
 
 2. **vikunja-mcp** ✅
-   - Location: `/home/x-forge/.claude/mcp-servers/vikunja/src/server.py`
+   - Location: `/home/samuelrodda/.claude/mcp-servers/vikunja/src/server.py`
    - Pattern: Arc Forge secret path pattern
    - Implementation: Complete with dev fallback
    - Tools: 27 (reports 23 due to lazy-mcp bug)
@@ -175,7 +175,7 @@ After systematic review of all 11 MCP servers, **only Vikunja exhibits this disc
 - Rare edge case in lazy-mcp's discovery that only affects certain tool patterns
 
 ### Investigation Status
-Documented in detail at: `/home/x-forge/repos/2-areas/lazy-mcp-preload/ISSUES.md#issue_001`
+Documented in detail at: `/home/samuelrodda/repos/2-areas/lazy-mcp-preload/ISSUES.md#issue_001`
 
 ### Next Steps
 1. Debug lazy-mcp tool discovery code in `internal/hierarchy`
@@ -188,11 +188,11 @@ Documented in detail at: `/home/x-forge/repos/2-areas/lazy-mcp-preload/ISSUES.md
 ## Repository Locations
 
 ### Production Servers (Installed)
-- joplin-mcp: `/home/x-forge/.claude/mcp-servers/joplin/`
-- vikunja-mcp: `/home/x-forge/.claude/mcp-servers/vikunja/`
+- joplin-mcp: `/home/samuelrodda/.claude/mcp-servers/joplin/`
+- vikunja-mcp: `/home/samuelrodda/.claude/mcp-servers/vikunja/`
 
 ### Source Repositories
-All servers: `/home/x-forge/repos/3-resources/MCP/`
+All servers: `/home/samuelrodda/repos/3-resources/MCP/`
 - cloudflare-mcp/
 - joplin-mcp/
 - mailjet-mcp/
