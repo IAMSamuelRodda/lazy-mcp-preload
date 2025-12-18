@@ -70,6 +70,75 @@ type OptionsV2 struct {
 	PreloadAll        optional.Field[bool] `json:"preloadAll,omitempty"` // Preload all servers in background at startup
 	AuthTokens        []string             `json:"authTokens,omitempty"`
 	ToolFilter        *ToolFilterConfig    `json:"toolFilter,omitempty"`
+
+	// Secrets provider options (disabled by default)
+	// Provider type: "none" (default), "openbao", "env"
+	SecretsProvider       string               `json:"secretsProvider,omitempty"`
+	SecretsAutoStart      optional.Field[bool] `json:"secretsAutoStart,omitempty"`
+	SecretsAutoStartCmd   string               `json:"secretsAutoStartCmd,omitempty"`   // e.g., "start-openbao-mcp"
+	SecretsProviderAddr   string               `json:"secretsProviderAddr,omitempty"`   // e.g., "http://127.0.0.1:18200"
+	SecretsSessionPath    string               `json:"secretsSessionPath,omitempty"`    // e.g., "~/.bitwarden-guard/sessions/current"
+	SecretsSessionEnvVar  string               `json:"secretsSessionEnvVar,omitempty"`  // e.g., "BW_SESSION"
+	SecretsHealthTimeoutMs optional.Field[int] `json:"secretsHealthTimeoutMs,omitempty"` // default: 2000
+	SecretsStartTimeoutMs  optional.Field[int] `json:"secretsStartTimeoutMs,omitempty"`  // default: 15000
+}
+
+// SecretsConfig represents secrets provider configuration
+type SecretsConfig struct {
+	Provider        string
+	AutoStart       bool
+	AutoStartCmd    string
+	ProviderAddr    string
+	SessionPath     string
+	SessionEnvVar   string
+	HealthTimeoutMs int
+	StartTimeoutMs  int
+}
+
+// GetSecretsConfig extracts secrets provider configuration from OptionsV2
+// Returns a disabled config by default (Provider: "none")
+func (o *OptionsV2) GetSecretsConfig() *SecretsConfig {
+	cfg := &SecretsConfig{
+		Provider:        "none",
+		AutoStart:       false,
+		AutoStartCmd:    "",
+		ProviderAddr:    "",
+		SessionPath:     "",
+		SessionEnvVar:   "BW_SESSION",
+		HealthTimeoutMs: 2000,
+		StartTimeoutMs:  15000,
+	}
+
+	if o == nil {
+		return cfg
+	}
+
+	if o.SecretsProvider != "" {
+		cfg.Provider = o.SecretsProvider
+	}
+	if o.SecretsAutoStart.Present() {
+		cfg.AutoStart = o.SecretsAutoStart.OrElse(false)
+	}
+	if o.SecretsAutoStartCmd != "" {
+		cfg.AutoStartCmd = o.SecretsAutoStartCmd
+	}
+	if o.SecretsProviderAddr != "" {
+		cfg.ProviderAddr = o.SecretsProviderAddr
+	}
+	if o.SecretsSessionPath != "" {
+		cfg.SessionPath = o.SecretsSessionPath
+	}
+	if o.SecretsSessionEnvVar != "" {
+		cfg.SessionEnvVar = o.SecretsSessionEnvVar
+	}
+	if o.SecretsHealthTimeoutMs.Present() {
+		cfg.HealthTimeoutMs = o.SecretsHealthTimeoutMs.OrElse(2000)
+	}
+	if o.SecretsStartTimeoutMs.Present() {
+		cfg.StartTimeoutMs = o.SecretsStartTimeoutMs.OrElse(15000)
+	}
+
+	return cfg
 }
 
 type MCPProxyConfigV2 struct {

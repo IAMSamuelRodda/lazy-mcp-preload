@@ -15,6 +15,8 @@ import (
 
 	"github.com/x-forge/lazy-mcp-preload/internal/config"
 	"github.com/x-forge/lazy-mcp-preload/internal/hierarchy"
+	"github.com/x-forge/lazy-mcp-preload/internal/secrets"
+	"github.com/x-forge/lazy-mcp-preload/internal/secrets/openbao"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -77,6 +79,39 @@ func recoverMiddleware(prefix string) MiddlewareFunc {
 
 // StartStdioServer starts the stdio server with the given configuration
 func StartStdioServer(cfg *config.Config) error {
+	// Check secrets provider availability (graceful - warns but doesn't block)
+	secretsCfg := cfg.McpProxy.Options.GetSecretsConfig()
+	if secretsCfg.Provider != "none" && secretsCfg.Provider != "" {
+		var provider secrets.Provider
+		switch secretsCfg.Provider {
+		case "openbao":
+			provider = openbao.New(&secrets.Config{
+				Provider:        secretsCfg.Provider,
+				AutoStart:       secretsCfg.AutoStart,
+				AutoStartCmd:    secretsCfg.AutoStartCmd,
+				ProviderAddr:    secretsCfg.ProviderAddr,
+				SessionPath:     secretsCfg.SessionPath,
+				SessionEnvVar:   secretsCfg.SessionEnvVar,
+				HealthTimeoutMs: secretsCfg.HealthTimeoutMs,
+				StartTimeoutMs:  secretsCfg.StartTimeoutMs,
+			})
+		}
+
+		if provider != nil {
+			status := provider.EnsureAvailable()
+			if !status.Available {
+				// Log warning but DON'T block - individual servers will be skipped during preload
+				log.Printf("WARNING: Secrets provider (%s) unavailable (%s). Servers requiring secrets will be disabled.",
+					secretsCfg.Provider, status.ErrorCode)
+				if secretsCfg.AutoStartCmd != "" {
+					log.Printf("To fix: run '%s' or ensure session is available", secretsCfg.AutoStartCmd)
+				}
+			} else if status.AutoStarted {
+				log.Printf("Secrets provider (%s) was auto-started successfully", secretsCfg.Provider)
+			}
+		}
+	}
+
 	// Load hierarchy from filesystem
 	log.Printf("Loading hierarchy from %s", cfg.McpProxy.HierarchyPath)
 	h, err := hierarchy.LoadHierarchy(cfg.McpProxy.HierarchyPath)
@@ -213,6 +248,39 @@ func StartStdioServer(cfg *config.Config) error {
 func StartHTTPServer(cfg *config.Config) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// Check secrets provider availability (graceful - warns but doesn't block)
+	secretsCfg := cfg.McpProxy.Options.GetSecretsConfig()
+	if secretsCfg.Provider != "none" && secretsCfg.Provider != "" {
+		var provider secrets.Provider
+		switch secretsCfg.Provider {
+		case "openbao":
+			provider = openbao.New(&secrets.Config{
+				Provider:        secretsCfg.Provider,
+				AutoStart:       secretsCfg.AutoStart,
+				AutoStartCmd:    secretsCfg.AutoStartCmd,
+				ProviderAddr:    secretsCfg.ProviderAddr,
+				SessionPath:     secretsCfg.SessionPath,
+				SessionEnvVar:   secretsCfg.SessionEnvVar,
+				HealthTimeoutMs: secretsCfg.HealthTimeoutMs,
+				StartTimeoutMs:  secretsCfg.StartTimeoutMs,
+			})
+		}
+
+		if provider != nil {
+			status := provider.EnsureAvailable()
+			if !status.Available {
+				// Log warning but DON'T block - individual servers will be skipped during preload
+				log.Printf("WARNING: Secrets provider (%s) unavailable (%s). Servers requiring secrets will be disabled.",
+					secretsCfg.Provider, status.ErrorCode)
+				if secretsCfg.AutoStartCmd != "" {
+					log.Printf("To fix: run '%s' or ensure session is available", secretsCfg.AutoStartCmd)
+				}
+			} else if status.AutoStarted {
+				log.Printf("Secrets provider (%s) was auto-started successfully", secretsCfg.Provider)
+			}
+		}
+	}
 
 	// Load hierarchy from filesystem
 	log.Printf("Loading hierarchy from %s", cfg.McpProxy.HierarchyPath)

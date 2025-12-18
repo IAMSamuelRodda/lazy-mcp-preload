@@ -7,7 +7,16 @@
     "options": {
       "logEnabled": true,
       "lazyLoad": true,
-      "preloadAll": true
+      "preloadAll": true,
+
+      "_comment_secrets": "Secrets provider configuration (disabled by default)",
+      "_comment_secrets_providers": "Supported providers: 'none' (default), 'openbao', 'env'",
+      "secretsProvider": "none",
+      "secretsAutoStart": false,
+      "secretsAutoStartCmd": "",
+      "secretsProviderAddr": "",
+      "secretsSessionPath": "",
+      "secretsSessionEnvVar": ""
     }
   },
   "mcpServers": {

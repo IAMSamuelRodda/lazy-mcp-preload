@@ -13,6 +13,7 @@ import (
 
 	"github.com/x-forge/lazy-mcp-preload/internal/client"
 	"github.com/x-forge/lazy-mcp-preload/internal/config"
+	"github.com/x-forge/lazy-mcp-preload/internal/secrets"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -414,6 +415,16 @@ func (h *Hierarchy) HandleExecuteTool(ctx context.Context, registry *ServerRegis
 		return nil, fmt.Errorf("no MCP server configured for tool: %s", toolPath)
 	}
 
+	// Check if server was disabled during preload
+	if disabled, reason := registry.IsDisabled(serverName); disabled {
+		log.Printf("Attempted to use disabled server %s for tool %s: %s", serverName, toolPath, reason)
+		return nil, &DisabledServerError{
+			Server:  serverName,
+			Reason:  reason,
+			Message: fmt.Sprintf("Server '%s' is disabled: %s. Check logs for details.", serverName, reason),
+		}
+	}
+
 	log.Printf("Resolved tool: path=%s, server=%s, maps_to=%s", toolPath, serverName, toolDef.MapsTo)
 
 	// Get or load the MCP client for this server
@@ -518,19 +529,48 @@ func (h *Hierarchy) maybeWrapInParams(toolDef *ToolDefinition, arguments map[str
 	}
 }
 
+// DisabledServerError is returned when attempting to use a disabled server
+type DisabledServerError struct {
+	Server  string
+	Reason  string
+	Message string
+}
+
+func (e *DisabledServerError) Error() string {
+	return e.Message
+}
+
 // ServerRegistry manages MCP client connections
 type ServerRegistry struct {
-	clients       map[string]*client.Client
-	serverConfigs map[string]*config.MCPClientConfigV2
-	mu            sync.RWMutex
+	clients         map[string]*client.Client
+	serverConfigs   map[string]*config.MCPClientConfigV2
+	disabledServers map[string]string // server name -> error reason/code
+	mu              sync.RWMutex
 }
 
 // NewServerRegistry creates a new server registry with server configurations
 func NewServerRegistry(serverConfigs map[string]*config.MCPClientConfigV2) *ServerRegistry {
 	return &ServerRegistry{
-		clients:       make(map[string]*client.Client),
-		serverConfigs: serverConfigs,
+		clients:         make(map[string]*client.Client),
+		serverConfigs:   serverConfigs,
+		disabledServers: make(map[string]string),
 	}
+}
+
+// DisableServer marks a server as unavailable with reason
+func (r *ServerRegistry) DisableServer(name string, reason string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.disabledServers[name] = reason
+	log.Printf("Server %s DISABLED: %s", name, reason)
+}
+
+// IsDisabled checks if server was disabled during preload
+func (r *ServerRegistry) IsDisabled(name string) (bool, string) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	reason, disabled := r.disabledServers[name]
+	return disabled, reason
 }
 
 // GetOrLoadServer gets an existing client or creates and initializes a new one
@@ -559,9 +599,9 @@ func (r *ServerRegistry) GetOrLoadServer(ctx context.Context, serverName string)
 		return nil, fmt.Errorf("server config not found: %s", serverName)
 	}
 
-	// Create a context with 30-second timeout for server initialization
-	// This prevents hanging indefinitely if a server is unresponsive
-	initCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	// Create a context with 5-second timeout for server initialization
+	// This enables fast-fail detection when servers crash or are unresponsive
+	initCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	start := time.Now()
@@ -632,6 +672,7 @@ func (r *ServerRegistry) GetServerNames() []string {
 
 // PreloadServers starts all configured servers in parallel background goroutines
 // This eliminates first-call latency by warming up servers before they're needed
+// Failed servers are disabled gracefully - they don't block the entire proxy
 func (r *ServerRegistry) PreloadServers(ctx context.Context) {
 	names := r.GetServerNames()
 	if len(names) == 0 {
@@ -641,6 +682,10 @@ func (r *ServerRegistry) PreloadServers(ctx context.Context) {
 	log.Printf("Background preloading %d MCP servers...", len(names))
 
 	var wg sync.WaitGroup
+	successCount := 0
+	failCount := 0
+	var countMu sync.Mutex
+
 	for _, name := range names {
 		wg.Add(1)
 		go func(serverName string) {
@@ -648,14 +693,28 @@ func (r *ServerRegistry) PreloadServers(ctx context.Context) {
 			start := time.Now()
 			_, err := r.GetOrLoadServer(ctx, serverName)
 			if err != nil {
-				log.Printf("Failed to preload server %s: %v", serverName, err)
+				// Parse error to determine cause and disable the server
+				errorCode, _ := secrets.ParseErrorFromStderr(err.Error())
+				r.DisableServer(serverName, string(errorCode))
+				log.Printf("Preload FAILED for %s [%s]: %v (took %v)", serverName, errorCode, err, time.Since(start))
+				countMu.Lock()
+				failCount++
+				countMu.Unlock()
 			} else {
-				log.Printf("Preloaded server %s in %v", serverName, time.Since(start))
+				log.Printf("Preload OK for %s in %v", serverName, time.Since(start))
+				countMu.Lock()
+				successCount++
+				countMu.Unlock()
 			}
 		}(name)
 	}
 
 	// Wait for all servers to be loaded
 	wg.Wait()
-	log.Printf("Background preload complete - all servers warm")
+
+	if failCount > 0 {
+		log.Printf("Background preload complete: %d servers ready, %d servers disabled", successCount, failCount)
+	} else {
+		log.Printf("Background preload complete - all %d servers ready", successCount)
+	}
 }
