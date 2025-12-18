@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/samuelrodda/mcp-proxy/internal/client"
-	"github.com/samuelrodda/mcp-proxy/internal/config"
-	"github.com/samuelrodda/mcp-proxy/internal/secrets"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/client"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/config"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/secrets"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 

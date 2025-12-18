@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/samuelrodda/mcp-proxy/internal/config"
-	"github.com/samuelrodda/mcp-proxy/internal/server"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/config"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/server"
 )
 
 var BuildVersion = "dev"

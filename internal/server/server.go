@@ -13,10 +13,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/samuelrodda/mcp-proxy/internal/config"
-	"github.com/samuelrodda/mcp-proxy/internal/hierarchy"
-	"github.com/samuelrodda/mcp-proxy/internal/secrets"
-	"github.com/samuelrodda/mcp-proxy/internal/secrets/openbao"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/config"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/hierarchy"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/secrets"
+	"github.com/IAMSamuelRodda/mcp-proxy/internal/secrets/openbao"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )

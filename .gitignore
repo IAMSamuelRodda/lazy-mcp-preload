@@ -36,5 +36,3 @@ config/*.local.json
 .env.*
 !.env.example
 
-# Project-specific Claude Code workflow docs (internal)
-.claude/

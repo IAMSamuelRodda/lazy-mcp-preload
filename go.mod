@@ -1,4 +1,4 @@
-module github.com/samuelrodda/mcp-proxy
+module github.com/IAMSamuelRodda/mcp-proxy
 
 go 1.24.0
 

@@ -26,7 +26,7 @@ This progressive disclosure pattern reduces context to ~800 tokens while maintai
 
 ```bash
 # Clone and build
-git clone https://github.com/samuelrodda/mcp-proxy.git
+git clone https://github.com/IAMSamuelRodda/mcp-proxy.git
 cd mcp-proxy
 ./scripts/install.sh
 
