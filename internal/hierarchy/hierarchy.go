@@ -460,8 +460,36 @@ func (h *Hierarchy) HandleExecuteTool(ctx context.Context, registry *ServerRegis
 
 	result, err := client.GetClient().CallTool(toolCtx, callRequest)
 	if err != nil {
-		log.Printf("Tool call failed for %s after %v: %v", actualToolName, time.Since(callStart), err)
-		return nil, fmt.Errorf("failed to call tool %s: %w", actualToolName, err)
+		// Check if this is a transport error (broken pipe, connection reset, etc.)
+		// If so, remove the client and retry once with a fresh connection
+		errStr := err.Error()
+		if strings.Contains(errStr, "broken pipe") ||
+			strings.Contains(errStr, "connection reset") ||
+			strings.Contains(errStr, "transport error") {
+			log.Printf("Transport error for %s, attempting reconnection: %v", serverName, err)
+			registry.RemoveClient(serverName)
+
+			// Retry with fresh connection
+			client, err = registry.GetOrLoadServer(ctx, serverName)
+			if err != nil {
+				log.Printf("Reconnection failed for %s: %v", serverName, err)
+				return nil, fmt.Errorf("failed to reconnect to %s: %w", serverName, err)
+			}
+
+			// Retry the tool call with fresh connection
+			retryCtx, retryCancel := context.WithTimeout(ctx, 60*time.Second)
+			defer retryCancel()
+
+			result, err = client.GetClient().CallTool(retryCtx, callRequest)
+			if err != nil {
+				log.Printf("Tool call failed after reconnection for %s: %v", actualToolName, err)
+				return nil, fmt.Errorf("failed to call tool %s after reconnection: %w", actualToolName, err)
+			}
+			log.Printf("Tool %s succeeded after reconnection in %v", actualToolName, time.Since(callStart))
+		} else {
+			log.Printf("Tool call failed for %s after %v: %v", actualToolName, time.Since(callStart), err)
+			return nil, fmt.Errorf("failed to call tool %s: %w", actualToolName, err)
+		}
 	}
 
 	log.Printf("Tool %s completed in %v (total: %v)", actualToolName, time.Since(callStart), time.Since(start))
@@ -655,6 +683,19 @@ func (r *ServerRegistry) Close() {
 	for name, client := range r.clients {
 		log.Printf("Closing MCP client: %s", name)
 		_ = client.Close()
+	}
+}
+
+// RemoveClient removes a client from the registry, allowing it to be recreated
+// on the next GetOrLoadServer call. Used for reconnection after transport errors.
+func (r *ServerRegistry) RemoveClient(serverName string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if client, exists := r.clients[serverName]; exists {
+		log.Printf("Removing failed MCP client: %s (will reconnect on next call)", serverName)
+		_ = client.Close()
+		delete(r.clients, serverName)
 	}
 }
 
