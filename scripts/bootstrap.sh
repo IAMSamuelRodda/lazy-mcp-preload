@@ -68,6 +68,13 @@ check_dependencies() {
     fi
     log_info "jq found"
 
+    # envsubst for variable expansion
+    if ! command -v envsubst &>/dev/null; then
+        log_error "envsubst not found. Install: sudo apt install gettext-base"
+        exit 1
+    fi
+    log_info "envsubst found"
+
     # uv (optional, faster)
     if command -v uv &>/dev/null; then
         log_info "uv found (fast package installs)"
@@ -346,8 +353,9 @@ install_mcp_proxy() {
     cp build/structure_generator "$MCP_PROXY_DIR/"
     chmod +x "$MCP_PROXY_DIR/mcp-proxy" "$MCP_PROXY_DIR/structure_generator"
 
-    log_info "Copying configuration..."
-    cp "$CONFIG_FILE" "$MCP_PROXY_DIR/config.json"
+    log_info "Expanding and copying configuration..."
+    export MCP_SERVERS_DIR MCP_PROXY_DIR HOME
+    envsubst '${MCP_SERVERS_DIR} ${MCP_PROXY_DIR} ${HOME}' < "$CONFIG_FILE" > "$MCP_PROXY_DIR/config.json"
 
     log_info "Generating tool hierarchy..."
     "$MCP_PROXY_DIR/structure_generator" \
@@ -374,8 +382,9 @@ refresh_only() {
         exit 1
     fi
 
-    log_info "Copying configuration..."
-    cp "$CONFIG_FILE" "$MCP_PROXY_DIR/config.json"
+    log_info "Expanding and copying configuration..."
+    export MCP_SERVERS_DIR MCP_PROXY_DIR HOME
+    envsubst '${MCP_SERVERS_DIR} ${MCP_PROXY_DIR} ${HOME}' < "$CONFIG_FILE" > "$MCP_PROXY_DIR/config.json"
 
     log_info "Generating tool hierarchy..."
     "$MCP_PROXY_DIR/structure_generator" \

@@ -1,11 +1,16 @@
 {
+  "_variables": {
+    "_comment": "These variables are expanded by bootstrap.sh when deploying:",
+    "MCP_SERVERS_DIR": "~/.claude/mcp-servers (default)",
+    "MCP_PROXY_DIR": "~/.claude/mcp-proxy (default)",
+    "HOME": "User home directory"
+  },
   "mcpProxy": {
     "name": "MCP Proxy",
     "version": "1.0.0",
     "type": "stdio",
     "hierarchyPath": "${MCP_PROXY_DIR}/hierarchy",
     "options": {
-      "logEnabled": true,
       "lazyLoad": true,
       "preloadAll": true,
 
@@ -20,14 +25,13 @@
     }
   },
   "mcpServers": {
-    "_comment": "Each server can have a 'source' field for installation",
+    "_comment": "Each server needs a 'source' field for installation by bootstrap.sh",
 
     "example-git": {
       "_comment": "Server installed from GitHub",
       "source": {
         "type": "git",
-        "url": "https://github.com/user/mcp-server.git",
-        "ref": "main"
+        "url": "https://github.com/user/mcp-server.git"
       },
       "transportType": "stdio",
       "command": "${MCP_SERVERS_DIR}/example-git/.venv/bin/python",
@@ -37,7 +41,7 @@
     },
 
     "example-local": {
-      "_comment": "Server installed from local path",
+      "_comment": "Server installed from local dev repo (copied, not symlinked)",
       "source": {
         "type": "local",
         "path": "~/repos/my-mcp-server"
@@ -49,8 +53,23 @@
       "options": { "lazyLoad": true }
     },
 
+    "example-module": {
+      "_comment": "Python module entrypoint (-m pattern)",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/user/mcp-server.git"
+      },
+      "transportType": "stdio",
+      "command": "${MCP_SERVERS_DIR}/example-module/.venv/bin/python",
+      "args": ["-m", "mcp_server.server"],
+      "env": {
+        "PYTHONPATH": "${MCP_SERVERS_DIR}/example-module"
+      },
+      "options": { "lazyLoad": true }
+    },
+
     "example-remote": {
-      "_comment": "Remote HTTP server (no source needed)",
+      "_comment": "Remote HTTP server (no source needed, no installation)",
       "transportType": "streamable-http",
       "url": "https://example.com/mcp",
       "options": { "lazyLoad": true }
