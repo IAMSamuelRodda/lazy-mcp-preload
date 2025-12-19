@@ -12,10 +12,15 @@ Aggregating MCP proxy with ~95% context reduction through progressive tool discl
 
 Without a valid `config.local.json`, the install will create an empty config with no MCP servers.
 
-## Dependency Chain
+## Full Workstation Bootstrap
 
-For a full workstation setup, install in this order:
+For a new machine, run the bootstrap script to install all dependencies:
 
+```bash
+./scripts/bootstrap.sh
+```
+
+This orchestrates installation of:
 1. **bitwarden-guard** (`~/repos/3-resources/bitwarden-guard/`) - Session management
 2. **openbao-agents** (`~/repos/2-areas/openbao-agents/`) - Secrets access
 3. **MCP servers** (`~/.claude/mcp-servers/*/`) - Each needs `.venv` with deps
