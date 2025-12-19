@@ -349,6 +349,8 @@ install_mcp_proxy() {
 
     log_info "Deploying binaries..."
     mkdir -p "$MCP_PROXY_DIR"
+    # Clean up any stale .new files from failed previous runs
+    rm -f "$MCP_PROXY_DIR"/*.new
     # Atomic replacement to avoid "Text file busy" when binary is running
     cp build/mcp-proxy "$MCP_PROXY_DIR/mcp-proxy.new"
     cp build/structure_generator "$MCP_PROXY_DIR/structure_generator.new"
