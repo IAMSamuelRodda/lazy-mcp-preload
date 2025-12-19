@@ -69,10 +69,12 @@ install_binary() {
     echo ""
     echo "[3/5] Installing binary..."
 
-    cp "$PROJECT_DIR/build/mcp-proxy" "$MCP_PROXY_DIR/"
-    cp "$PROJECT_DIR/build/structure_generator" "$MCP_PROXY_DIR/"
-    chmod +x "$MCP_PROXY_DIR/mcp-proxy"
-    chmod +x "$MCP_PROXY_DIR/structure_generator"
+    # Atomic replacement to avoid "Text file busy" when binary is running
+    cp "$PROJECT_DIR/build/mcp-proxy" "$MCP_PROXY_DIR/mcp-proxy.new"
+    cp "$PROJECT_DIR/build/structure_generator" "$MCP_PROXY_DIR/structure_generator.new"
+    chmod +x "$MCP_PROXY_DIR/mcp-proxy.new" "$MCP_PROXY_DIR/structure_generator.new"
+    mv -f "$MCP_PROXY_DIR/mcp-proxy.new" "$MCP_PROXY_DIR/mcp-proxy"
+    mv -f "$MCP_PROXY_DIR/structure_generator.new" "$MCP_PROXY_DIR/structure_generator"
 
     echo -e "${GREEN}[OK]${NC} Binary installed to $MCP_PROXY_DIR/mcp-proxy"
 }
