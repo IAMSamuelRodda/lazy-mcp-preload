@@ -9,8 +9,8 @@
       "lazyLoad": true,
       "preloadAll": true,
 
-      "_comment_secrets": "Secrets provider configuration (disabled by default)",
-      "_comment_secrets_providers": "Supported providers: 'none' (default), 'openbao', 'env'",
+      "_comment_secrets": "Secrets provider configuration (optional)",
+      "_comment_secrets_providers": "Supported: 'none' (default), 'openbao', 'env'",
       "secretsProvider": "none",
       "secretsAutoStart": false,
       "secretsAutoStartCmd": "",
@@ -20,11 +20,39 @@
     }
   },
   "mcpServers": {
-    "example-server": {
+    "_comment": "Each server can have a 'source' field for installation",
+
+    "example-git": {
+      "_comment": "Server installed from GitHub",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/user/mcp-server.git",
+        "ref": "main"
+      },
       "transportType": "stdio",
-      "command": "${MCP_SERVERS_DIR}/example/.venv/bin/python",
-      "args": ["${MCP_SERVERS_DIR}/example/server.py"],
+      "command": "${MCP_SERVERS_DIR}/example-git/.venv/bin/python",
+      "args": ["${MCP_SERVERS_DIR}/example-git/server.py"],
       "env": {},
+      "options": { "lazyLoad": true }
+    },
+
+    "example-local": {
+      "_comment": "Server installed from local path",
+      "source": {
+        "type": "local",
+        "path": "~/repos/my-mcp-server"
+      },
+      "transportType": "stdio",
+      "command": "${MCP_SERVERS_DIR}/example-local/.venv/bin/python",
+      "args": ["${MCP_SERVERS_DIR}/example-local/server.py"],
+      "env": {},
+      "options": { "lazyLoad": true }
+    },
+
+    "example-remote": {
+      "_comment": "Remote HTTP server (no source needed)",
+      "transportType": "streamable-http",
+      "url": "https://example.com/mcp",
       "options": { "lazyLoad": true }
     }
   }

@@ -1,16 +1,16 @@
 #!/bin/bash
 # bootstrap.sh - Full workstation setup for MCP proxy infrastructure
 #
-# Orchestrates installation of:
+# Installs:
 # 1. bitwarden-guard (session management)
 # 2. openbao-agents (secrets access)
-# 3. MCP servers (Python venvs)
+# 3. MCP servers (from source definitions in config)
 # 4. mcp-proxy (this project)
 #
-# Prerequisites:
-# - Git repos cloned to expected locations
-# - Python 3.11+ installed
-# - Go 1.21+ installed (or will prompt to install)
+# Flags:
+#   (none)      Full bootstrap - install/update everything
+#   --refresh   Config + hierarchy only (skip source updates)
+#   --force     Clean reinstall of all MCP servers
 
 set -e
 
@@ -30,43 +30,227 @@ log_section() { echo -e "\n${BLUE}===${NC} $1 ${BLUE}===${NC}"; }
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-# GitHub URLs for dependencies
+# GitHub URLs for core dependencies
 BITWARDEN_GUARD_URL="https://github.com/IAMSamuelRodda/bitwarden-guard.git"
 OPENBAO_AGENTS_URL="https://github.com/IAMSamuelRodda/openbao-agents.git"
 
-# Default paths (can be overridden via environment)
+# Default paths
 DEPS_DIR="${DEPS_DIR:-$HOME/.claude/deps}"
 BITWARDEN_GUARD_REPO="${BITWARDEN_GUARD_REPO:-$DEPS_DIR/bitwarden-guard}"
 OPENBAO_AGENTS_REPO="${OPENBAO_AGENTS_REPO:-$DEPS_DIR/openbao-agents}"
 MCP_SERVERS_DIR="${MCP_SERVERS_DIR:-$HOME/.claude/mcp-servers}"
 MCP_PROXY_DIR="${MCP_PROXY_DIR:-$HOME/.claude/mcp-proxy}"
+CONFIG_FILE="$PROJECT_DIR/config/config.local.json"
 
-# Track what was installed
+# Flags
+FORCE_REINSTALL=false
+
+# Track results
 INSTALLED=()
+UPDATED=()
 SKIPPED=()
 FAILED=()
 
-check_python() {
+check_dependencies() {
+    log_section "Checking dependencies"
+
+    # Python
     if ! command -v python3 &>/dev/null; then
         log_error "Python 3 not found"
         exit 1
     fi
+    log_info "Python $(python3 --version | awk '{print $2}')"
 
-    PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-    if [[ $(echo "$PYTHON_VERSION < 3.11" | bc -l) -eq 1 ]]; then
-        log_warn "Python $PYTHON_VERSION found, recommend 3.11+"
+    # jq for JSON parsing
+    if ! command -v jq &>/dev/null; then
+        log_error "jq not found. Install: sudo apt install jq"
+        exit 1
+    fi
+    log_info "jq found"
+
+    # uv (optional, faster)
+    if command -v uv &>/dev/null; then
+        log_info "uv found (fast package installs)"
+        USE_UV=true
     else
-        log_info "Python $PYTHON_VERSION"
+        log_warn "uv not found, using pip"
+        USE_UV=false
     fi
 }
 
-check_uv() {
-    if ! command -v uv &>/dev/null; then
-        log_warn "uv not found, will use pip (slower)"
+# Compute hash of dependency files
+compute_deps_hash() {
+    local dir="$1"
+    local hash=""
+
+    if [ -f "$dir/pyproject.toml" ]; then
+        hash=$(md5sum "$dir/pyproject.toml" 2>/dev/null | cut -d' ' -f1)
+    elif [ -f "$dir/requirements.txt" ]; then
+        hash=$(md5sum "$dir/requirements.txt" 2>/dev/null | cut -d' ' -f1)
+    fi
+
+    echo "$hash"
+}
+
+# Install Python venv for a server
+install_venv() {
+    local server_dir="$1"
+    local server_name="$2"
+
+    cd "$server_dir"
+
+    # Check if deps changed
+    local current_hash=$(compute_deps_hash "$server_dir")
+    local hash_file="$server_dir/.deps_hash"
+    local old_hash=""
+    [ -f "$hash_file" ] && old_hash=$(cat "$hash_file")
+
+    if [ -d ".venv" ] && [ "$current_hash" = "$old_hash" ] && [ "$FORCE_REINSTALL" = false ]; then
+        log_info "$server_name: venv up to date"
+        return 0
+    fi
+
+    # Create/recreate venv
+    if [ -d ".venv" ]; then
+        log_info "$server_name: rebuilding venv (deps changed)"
+        rm -rf .venv
+    else
+        log_info "$server_name: creating venv"
+    fi
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+
+    # Install deps
+    if [ -f "pyproject.toml" ]; then
+        if $USE_UV; then
+            uv pip install -e . 2>/dev/null || pip install -e .
+        else
+            pip install -e .
+        fi
+    elif [ -f "requirements.txt" ]; then
+        if $USE_UV; then
+            uv pip install -r requirements.txt
+        else
+            pip install -r requirements.txt
+        fi
+    fi
+
+    deactivate
+
+    # Save hash
+    echo "$current_hash" > "$hash_file"
+}
+
+# Install/update a single MCP server from source
+install_mcp_server() {
+    local name="$1"
+    local source_type="$2"
+    local source_location="$3"
+    local server_dir="$MCP_SERVERS_DIR/$name"
+
+    log_info "Processing: $name"
+
+    mkdir -p "$MCP_SERVERS_DIR"
+
+    if [ "$source_type" = "git" ]; then
+        if [ -d "$server_dir" ]; then
+            if [ "$FORCE_REINSTALL" = true ]; then
+                log_info "$name: force reinstall - removing existing"
+                # Preserve .venv temporarily
+                if [ -d "$server_dir/.venv" ]; then
+                    mv "$server_dir/.venv" "/tmp/.venv_$name" 2>/dev/null || true
+                fi
+                rm -rf "$server_dir"
+                git clone "$source_location" "$server_dir"
+                # Restore .venv
+                if [ -d "/tmp/.venv_$name" ]; then
+                    mv "/tmp/.venv_$name" "$server_dir/.venv"
+                fi
+                UPDATED+=("$name")
+            elif [ -d "$server_dir/.git" ]; then
+                log_info "$name: pulling latest"
+                cd "$server_dir"
+                git pull --ff-only 2>/dev/null || git pull --rebase || {
+                    log_warn "$name: git pull failed, skipping update"
+                }
+                cd "$PROJECT_DIR"
+                UPDATED+=("$name")
+            else
+                log_warn "$name: exists but not a git repo, skipping"
+                SKIPPED+=("$name")
+                return 0
+            fi
+        else
+            log_info "$name: cloning from $source_location"
+            git clone "$source_location" "$server_dir"
+            INSTALLED+=("$name")
+        fi
+
+    elif [ "$source_type" = "local" ]; then
+        # Expand ~ in path
+        local local_path="${source_location/#\~/$HOME}"
+
+        if [ ! -d "$local_path" ]; then
+            log_error "$name: local source not found: $local_path"
+            FAILED+=("$name")
+            return 1
+        fi
+
+        # Clean replace (preserve .venv)
+        if [ -d "$server_dir/.venv" ]; then
+            mv "$server_dir/.venv" "/tmp/.venv_$name"
+        fi
+
+        rm -rf "$server_dir"
+        cp -r "$local_path" "$server_dir"
+
+        if [ -d "/tmp/.venv_$name" ]; then
+            mv "/tmp/.venv_$name" "$server_dir/.venv"
+        fi
+
+        if [ -d "$server_dir" ]; then
+            [ ${#INSTALLED[@]} -eq 0 ] && UPDATED+=("$name") || INSTALLED+=("$name")
+        fi
+    fi
+
+    # Install venv
+    install_venv "$server_dir" "$name"
+}
+
+# Parse config and install all MCP servers with source definitions
+install_mcp_servers() {
+    log_section "Step 3/4: MCP servers"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        log_error "Config file not found: $CONFIG_FILE"
         return 1
     fi
-    log_info "uv found (fast package installs)"
-    return 0
+
+    # Extract server names that have source definitions
+    local servers=$(jq -r '.mcpServers | to_entries[] | select(.value.source != null) | .key' "$CONFIG_FILE")
+
+    if [ -z "$servers" ]; then
+        log_warn "No servers with source definitions found in config"
+        return 0
+    fi
+
+    for name in $servers; do
+        local source_type=$(jq -r ".mcpServers[\"$name\"].source.type" "$CONFIG_FILE")
+        local source_location=""
+
+        if [ "$source_type" = "git" ]; then
+            source_location=$(jq -r ".mcpServers[\"$name\"].source.url" "$CONFIG_FILE")
+        elif [ "$source_type" = "local" ]; then
+            source_location=$(jq -r ".mcpServers[\"$name\"].source.path" "$CONFIG_FILE")
+        else
+            log_warn "$name: unknown source type '$source_type', skipping"
+            SKIPPED+=("$name")
+            continue
+        fi
+
+        install_mcp_server "$name" "$source_type" "$source_location" || true
+    done
 }
 
 # Step 1: bitwarden-guard
@@ -79,7 +263,6 @@ install_bitwarden_guard() {
         return 0
     fi
 
-    # Clone if not exists
     if [ ! -d "$BITWARDEN_GUARD_REPO" ]; then
         log_info "Cloning bitwarden-guard from GitHub..."
         mkdir -p "$DEPS_DIR"
@@ -112,7 +295,6 @@ install_openbao_agents() {
         return 0
     fi
 
-    # Clone if not exists
     if [ ! -d "$OPENBAO_AGENTS_REPO" ]; then
         log_info "Cloning openbao-agents from GitHub..."
         mkdir -p "$DEPS_DIR"
@@ -135,76 +317,19 @@ install_openbao_agents() {
     fi
 }
 
-# Step 3: MCP servers
-install_mcp_servers() {
-    log_section "Step 3/4: MCP servers"
-
-    if [ ! -d "$MCP_SERVERS_DIR" ]; then
-        log_warn "MCP servers directory not found: $MCP_SERVERS_DIR"
-        log_warn "Skipping MCP server venv setup"
-        return 0
-    fi
-
-    local use_uv=false
-    check_uv && use_uv=true
-
-    for server_dir in "$MCP_SERVERS_DIR"/*/; do
-        server_name=$(basename "$server_dir")
-
-        # Skip if no Python files
-        if ! ls "$server_dir"/*.py &>/dev/null && ! ls "$server_dir"/src/*.py &>/dev/null; then
-            continue
-        fi
-
-        # Check for existing venv
-        if [ -d "$server_dir/.venv" ]; then
-            log_info "$server_name: venv exists"
-            SKIPPED+=("mcp-$server_name")
-            continue
-        fi
-
-        log_info "$server_name: creating venv..."
-        cd "$server_dir"
-
-        python3 -m venv .venv
-        source .venv/bin/activate
-
-        # Install dependencies
-        if [ -f "pyproject.toml" ]; then
-            if $use_uv; then
-                uv pip install -e . 2>/dev/null || uv pip install -r requirements.txt 2>/dev/null || pip install -e .
-            else
-                pip install -e . 2>/dev/null || pip install -r requirements.txt 2>/dev/null
-            fi
-        elif [ -f "requirements.txt" ]; then
-            if $use_uv; then
-                uv pip install -r requirements.txt
-            else
-                pip install -r requirements.txt
-            fi
-        fi
-
-        deactivate
-        log_info "$server_name: venv created"
-        INSTALLED+=("mcp-$server_name")
-    done
-}
-
 # Step 4: mcp-proxy
 install_mcp_proxy() {
     log_section "Step 4/4: mcp-proxy"
 
     cd "$PROJECT_DIR"
 
-    # Check for config.local.json
-    if [ ! -f "config/config.local.json" ]; then
+    if [ ! -f "$CONFIG_FILE" ]; then
         log_error "config/config.local.json not found!"
-        log_error "Copy from config/config.template.json and configure for your machine"
+        log_error "Copy from config/config.template.json and configure"
         FAILED+=("mcp-proxy")
         return 1
     fi
 
-    # Check Go
     if ! command -v go &>/dev/null; then
         log_warn "Go not installed. Run: ./scripts/install-go.sh"
         FAILED+=("mcp-proxy")
@@ -212,22 +337,18 @@ install_mcp_proxy() {
     fi
     log_info "Go $(go version | awk '{print $3}')"
 
-    # Build
     log_info "Building mcp-proxy..."
     make build
 
-    # Deploy
     log_info "Deploying binaries..."
     mkdir -p "$MCP_PROXY_DIR"
     cp build/mcp-proxy "$MCP_PROXY_DIR/"
     cp build/structure_generator "$MCP_PROXY_DIR/"
     chmod +x "$MCP_PROXY_DIR/mcp-proxy" "$MCP_PROXY_DIR/structure_generator"
 
-    # Config
     log_info "Copying configuration..."
-    cp config/config.local.json "$MCP_PROXY_DIR/config.json"
+    cp "$CONFIG_FILE" "$MCP_PROXY_DIR/config.json"
 
-    # Generate hierarchy
     log_info "Generating tool hierarchy..."
     "$MCP_PROXY_DIR/structure_generator" \
         --config "$MCP_PROXY_DIR/config.json" \
@@ -237,13 +358,13 @@ install_mcp_proxy() {
     INSTALLED+=("mcp-proxy")
 }
 
-# Refresh only: skip deps, just update config and regenerate hierarchy
+# Refresh only: config + hierarchy
 refresh_only() {
     log_section "Refreshing mcp-proxy (config + hierarchy)"
 
     cd "$PROJECT_DIR"
 
-    if [ ! -f "config/config.local.json" ]; then
+    if [ ! -f "$CONFIG_FILE" ]; then
         log_error "config/config.local.json not found!"
         exit 1
     fi
@@ -254,7 +375,7 @@ refresh_only() {
     fi
 
     log_info "Copying configuration..."
-    cp config/config.local.json "$MCP_PROXY_DIR/config.json"
+    cp "$CONFIG_FILE" "$MCP_PROXY_DIR/config.json"
 
     log_info "Generating tool hierarchy..."
     "$MCP_PROXY_DIR/structure_generator" \
@@ -268,7 +389,7 @@ refresh_only() {
 
 # Summary
 print_summary() {
-    log_section "Installation Summary"
+    log_section "Summary"
 
     if [ ${#INSTALLED[@]} -gt 0 ]; then
         echo -e "${GREEN}Installed:${NC}"
@@ -277,8 +398,15 @@ print_summary() {
         done
     fi
 
+    if [ ${#UPDATED[@]} -gt 0 ]; then
+        echo -e "${BLUE}Updated:${NC}"
+        for item in "${UPDATED[@]}"; do
+            echo "  ↑ $item"
+        done
+    fi
+
     if [ ${#SKIPPED[@]} -gt 0 ]; then
-        echo -e "${YELLOW}Already installed:${NC}"
+        echo -e "${YELLOW}Skipped (already installed):${NC}"
         for item in "${SKIPPED[@]}"; do
             echo "  ⊘ $item"
         done
@@ -290,7 +418,6 @@ print_summary() {
             echo "  ✗ $item"
         done
         echo ""
-        echo "Fix the issues above and re-run: $0"
         return 1
     fi
 
@@ -298,25 +425,18 @@ print_summary() {
     log_info "Bootstrap complete!"
     echo ""
     echo "Next steps:"
-    echo "  1. Configure Bitwarden items for OpenBao (see openbao-agents docs)"
-    echo "  2. Restart Claude Code to pick up new MCP proxy"
-    echo "  3. Test: claude mcp list"
+    echo "  1. Restart Claude Code"
+    echo "  2. Test: claude mcp list"
 }
 
 # Main
 main() {
-    echo -e "${BLUE}╔══════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║${NC}     MCP Proxy Infrastructure Bootstrap              ${BLUE}║${NC}"
-    echo -e "${BLUE}╚══════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    echo "This script will install:"
-    echo "  1. bitwarden-guard  (session management)"
-    echo "  2. openbao-agents   (secrets access)"
-    echo "  3. MCP servers      (Python venvs)"
-    echo "  4. mcp-proxy        (aggregating proxy)"
+    echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║${NC}       MCP Proxy Infrastructure Bootstrap              ${BLUE}║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
-    check_python
+    check_dependencies
 
     install_bitwarden_guard || true
     install_openbao_agents || true
@@ -326,36 +446,39 @@ main() {
     print_summary
 }
 
+# Help
+show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Bootstrap full MCP proxy infrastructure."
+    echo ""
+    echo "Options:"
+    echo "  (none)       Full bootstrap - install/update all components"
+    echo "  --refresh    Config + hierarchy only (skip source updates)"
+    echo "  --force      Force clean reinstall of all MCP servers"
+    echo "  -h, --help   Show this help"
+    echo ""
+    echo "MCP servers are installed from source definitions in config.local.json."
+    echo "Each server can specify a 'source' with type 'git' or 'local'."
+    echo ""
+    echo "Examples:"
+    echo "  $0               # Full bootstrap"
+    echo "  $0 --refresh     # Just update config and hierarchy"
+    echo "  $0 --force       # Reinstall everything fresh"
+}
+
 # Parse arguments
 case "${1:-}" in
     -h|--help)
-        echo "Usage: $0 [OPTIONS]"
-        echo ""
-        echo "Bootstrap full MCP proxy infrastructure on a new workstation."
-        echo "Dependencies are cloned from GitHub automatically if not present."
-        echo ""
-        echo "Options:"
-        echo "  --refresh    Skip deps, just update config and regenerate hierarchy"
-        echo "  -h, --help   Show this help"
-        echo ""
-        echo "GitHub repos:"
-        echo "  bitwarden-guard: $BITWARDEN_GUARD_URL"
-        echo "  openbao-agents:  $OPENBAO_AGENTS_URL"
-        echo ""
-        echo "Environment variables:"
-        echo "  DEPS_DIR               Dependencies clone directory (default: ~/.claude/deps)"
-        echo "  BITWARDEN_GUARD_REPO   Override bitwarden-guard repo path"
-        echo "  OPENBAO_AGENTS_REPO    Override openbao-agents repo path"
-        echo "  MCP_SERVERS_DIR        MCP servers directory (default: ~/.claude/mcp-servers)"
-        echo "  MCP_PROXY_DIR          mcp-proxy install directory (default: ~/.claude/mcp-proxy)"
-        echo ""
-        echo "Examples:"
-        echo "  $0              # Full bootstrap (first time setup)"
-        echo "  $0 --refresh    # Just added a new server to config.local.json"
+        show_help
         exit 0
         ;;
     --refresh)
         refresh_only
+        ;;
+    --force)
+        FORCE_REINSTALL=true
+        main
         ;;
     *)
         main
