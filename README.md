@@ -29,17 +29,51 @@ This progressive disclosure pattern reduces context to ~800 tokens while maintai
 ## Quick Start
 
 ```bash
-# Clone
+# 1. Clone
 git clone https://github.com/IAMSamuelRodda/mcp-proxy.git
 cd mcp-proxy
 
-# Copy and configure
+# 2. Create your config
 cp config/config.template.json config/config.local.json
-# Edit config.local.json with your MCP servers
 
-# Bootstrap (installs MCP servers + proxy)
+# 3. Edit config.local.json:
+#    - Remove example-* entries
+#    - Add your MCP servers with source URLs
+#    - Keep ${VARIABLES} as-is (expanded automatically)
+
+# 4. Bootstrap (validates config, installs servers, updates ~/.claude.json)
 ./scripts/bootstrap.sh
+
+# 5. Restart Claude Code
 ```
+
+### Minimal Config Example
+
+```json
+{
+  "mcpProxy": {
+    "hierarchyPath": "${MCP_PROXY_DIR}/hierarchy",
+    "options": { "lazyLoad": true, "preloadAll": true }
+  },
+  "mcpServers": {
+    "my-server": {
+      "source": { "type": "git", "url": "https://github.com/you/my-mcp.git" },
+      "transportType": "stdio",
+      "command": "${MCP_SERVERS_DIR}/my-server/.venv/bin/python",
+      "args": ["${MCP_SERVERS_DIR}/my-server/server.py"],
+      "envFile": "${MCP_SERVERS_DIR}/my-server/.env",
+      "env": {},
+      "options": { "lazyLoad": true }
+    }
+  }
+}
+```
+
+**Key points:**
+- Use `${MCP_SERVERS_DIR}` for server paths (expands to `~/.claude/mcp-servers`)
+- Use `${MCP_PROXY_DIR}` for proxy paths (expands to `~/.claude/mcp-proxy`)
+- Add `envFile` for `.env` secrets OR use `env: {}` for inline variables
+- Every server needs a `source` for bootstrap to install it
 
 ## Bootstrap Workflow
 
@@ -56,11 +90,13 @@ The bootstrap script orchestrates full workstation setup:
 | `--refresh` | Config + hierarchy only (fast, skips source updates) |
 | `--force` | Clean reinstall all MCP servers from source |
 
-**What it installs:**
-1. **MCP servers** - From source definitions in config
-2. **mcp-proxy** - This proxy binary + hierarchy
-3. **bitwarden-guard** - Bitwarden CLI session management (with `--secure`)
-4. **openbao-agents** - Local secrets agents (with `--secure`)
+**What it does:**
+1. **Validates config** - Checks for missing/placeholder values
+2. **Installs MCP servers** - Clones from git, creates venvs
+3. **Builds mcp-proxy** - Compiles Go binary + structure generator
+4. **Deploys** - Copies to `~/.claude/mcp-proxy/`, expands variables
+5. **Updates ~/.claude.json** - Adds mcp-proxy entry automatically
+6. *(--secure only)* Installs bitwarden-guard + openbao-agents
 
 ## Configuration
 

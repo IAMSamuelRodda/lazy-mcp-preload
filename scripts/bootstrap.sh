@@ -409,6 +409,106 @@ refresh_only() {
     echo "Restart Claude Code to pick up changes."
 }
 
+# Update ~/.claude.json with mcp-proxy entry
+update_claude_json() {
+    local claude_json="$HOME/.claude.json"
+
+    log_section "Configuring Claude Code"
+
+    if [ ! -f "$claude_json" ]; then
+        log_warn "$claude_json not found - creating new config"
+        echo '{"mcpServers":{}}' > "$claude_json"
+    fi
+
+    # Check if mcp-proxy entry already exists
+    if grep -q '"mcp-proxy"' "$claude_json" 2>/dev/null; then
+        log_info "mcp-proxy already configured in $claude_json"
+        return 0
+    fi
+
+    # Backup existing config
+    cp "$claude_json" "$claude_json.backup.$(date +%Y%m%d_%H%M%S)"
+
+    # Add mcp-proxy using Python (handles JSON properly)
+    python3 << PYTHON_SCRIPT
+import json
+import sys
+
+config_path = "$claude_json"
+mcp_proxy_dir = "$MCP_PROXY_DIR"
+
+try:
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+except json.JSONDecodeError as e:
+    print(f"Error: Invalid JSON in {config_path}: {e}")
+    sys.exit(1)
+
+if 'mcpServers' not in config:
+    config['mcpServers'] = {}
+
+config['mcpServers']['mcp-proxy'] = {
+    "type": "stdio",
+    "command": f"{mcp_proxy_dir}/mcp-proxy",
+    "args": ["--config", f"{mcp_proxy_dir}/config.json"]
+}
+
+with open(config_path, 'w') as f:
+    json.dump(config, f, indent=2)
+
+print("Added mcp-proxy to ~/.claude.json")
+PYTHON_SCRIPT
+
+    if [ $? -eq 0 ]; then
+        log_info "Updated $claude_json with mcp-proxy"
+    else
+        log_error "Failed to update $claude_json"
+        FAILED+=("claude.json")
+    fi
+}
+
+# Validate config.local.json
+validate_config() {
+    log_section "Validating configuration"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        log_error "config/config.local.json not found!"
+        log_error "Copy from config/config.template.json first:"
+        echo ""
+        echo "  cp config/config.template.json config/config.local.json"
+        echo ""
+        exit 1
+    fi
+
+    # Check for unexpanded variables that shouldn't be there
+    if grep -q '\${[A-Z_]*}' "$CONFIG_FILE" 2>/dev/null; then
+        log_info "Config uses variables (will be expanded at deploy)"
+    fi
+
+    # Check for example/placeholder entries
+    if grep -q 'example\.com\|your-api-key\|user/mcp-server' "$CONFIG_FILE" 2>/dev/null; then
+        log_warn "Config contains example/placeholder values"
+        log_warn "Edit config/config.local.json before running bootstrap"
+    fi
+
+    # Check for at least one MCP server
+    local server_count=$(jq '.mcpServers | keys | length' "$CONFIG_FILE" 2>/dev/null)
+    if [ "$server_count" = "0" ] || [ -z "$server_count" ]; then
+        log_warn "No MCP servers defined in config"
+    else
+        log_info "Found $server_count MCP server(s) in config"
+    fi
+
+    # Check for servers with source definitions
+    local source_count=$(jq '[.mcpServers | to_entries[] | select(.value.source != null)] | length' "$CONFIG_FILE" 2>/dev/null)
+    if [ "$source_count" = "0" ] || [ -z "$source_count" ]; then
+        log_warn "No servers with 'source' definitions found"
+        log_warn "Servers without 'source' won't be installed by bootstrap"
+    else
+        log_info "Found $source_count server(s) with source definitions"
+    fi
+}
+
 # Summary
 print_summary() {
     log_section "Summary"
@@ -472,6 +572,7 @@ main() {
     fi
 
     check_dependencies
+    validate_config
 
     if [ "$SECURE_MODE" = true ]; then
         install_bitwarden_guard || true
@@ -480,6 +581,7 @@ main() {
 
     install_mcp_servers || true
     install_mcp_proxy || true
+    update_claude_json || true
 
     print_summary
 }
