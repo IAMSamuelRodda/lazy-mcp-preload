@@ -234,8 +234,9 @@ mcp-proxy/
 │   ├── config.template.json   # Portable template with variables
 │   └── config.local.json      # Your local config (gitignored)
 ├── scripts/
-│   ├── bootstrap.sh       # Full workstation setup
-│   └── install.sh         # Binary-only install
+│   ├── bootstrap.sh       # Full setup (MCP servers + proxy) - recommended
+│   ├── install.sh         # Binary-only (if servers already installed)
+│   └── install-go.sh      # Install Go if missing
 └── docs/
     └── SECURE_SETUP.md    # OpenBao + Bitwarden guide
 ```
