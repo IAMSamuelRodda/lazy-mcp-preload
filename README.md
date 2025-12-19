@@ -23,19 +23,110 @@ This progressive disclosure pattern reduces context to ~800 tokens while maintai
 | **Multi-transport** | stdio, SSE, HTTP Streamable |
 | **Graceful degradation** | Failed servers disabled, don't block |
 | **Secrets integration** | Optional OpenBao/Vault support |
-| **Fast-fail detection** | 5s timeout for quick error feedback |
+| **Source-based installation** | MCP servers installed from git/local sources |
+| **Portable config** | Variable expansion for machine-independent configs |
 
 ## Quick Start
 
 ```bash
-# Clone and build
+# Clone
 git clone https://github.com/IAMSamuelRodda/mcp-proxy.git
 cd mcp-proxy
-./scripts/install.sh
 
-# Or manually:
-go build -o build/mcp-proxy ./cmd/mcp-proxy
+# Copy and configure
+cp config/config.template.json config/config.local.json
+# Edit config.local.json with your MCP servers
+
+# Full bootstrap (installs everything)
+./scripts/bootstrap.sh
 ```
+
+## Bootstrap Workflow
+
+The bootstrap script orchestrates full workstation setup:
+
+```
+./scripts/bootstrap.sh [FLAGS]
+```
+
+| Flag | Behavior |
+|------|----------|
+| (none) | Full bootstrap: deps → git pull → venv check → build → deploy → hierarchy |
+| `--refresh` | Config + hierarchy only (fast, skips source updates) |
+| `--force` | Clean reinstall all MCP servers from source |
+
+**What it installs:**
+1. **bitwarden-guard** - Bitwarden CLI session management (optional)
+2. **openbao-agents** - Local secrets agents (optional)
+3. **MCP servers** - From source definitions in config
+4. **mcp-proxy** - This proxy binary + hierarchy
+
+## Configuration
+
+### Portable Config with Variables
+
+Config files use variables that are expanded at deploy time:
+
+```json
+{
+  "mcpProxy": {
+    "hierarchyPath": "${MCP_PROXY_DIR}/hierarchy"
+  },
+  "mcpServers": {
+    "my-server": {
+      "source": {
+        "type": "git",
+        "url": "https://github.com/user/mcp-server.git"
+      },
+      "command": "${MCP_SERVERS_DIR}/my-server/.venv/bin/python",
+      "args": ["${MCP_SERVERS_DIR}/my-server/server.py"]
+    }
+  }
+}
+```
+
+**Available variables:**
+| Variable | Default |
+|----------|---------|
+| `${MCP_SERVERS_DIR}` | `~/.claude/mcp-servers` |
+| `${MCP_PROXY_DIR}` | `~/.claude/mcp-proxy` |
+| `${HOME}` | User home directory |
+
+### Source Types
+
+Each MCP server can specify a source for installation:
+
+**Git source** (recommended):
+```json
+"source": {
+  "type": "git",
+  "url": "https://github.com/user/mcp-server.git"
+}
+```
+
+**Local source** (for development):
+```json
+"source": {
+  "type": "local",
+  "path": "~/repos/my-mcp-server"
+}
+```
+
+**Remote HTTP** (no installation needed):
+```json
+"transportType": "streamable-http",
+"url": "https://example.com/mcp"
+```
+
+### Update Behavior
+
+| Source Type | Update Mechanism |
+|-------------|------------------|
+| Git | `git pull` on each bootstrap run |
+| Local | Clean replace (rm + cp) preserving .venv |
+| Remote | No installation, connects directly |
+
+**Venv rebuilds** only occur when `pyproject.toml` or `requirements.txt` changes (hash-based detection).
 
 ## Setup Options
 
@@ -44,53 +135,11 @@ go build -o build/mcp-proxy ./cmd/mcp-proxy
 | **Simple** | `.env` files per server | Local dev, single machine |
 | **Secure** | OpenBao + Bitwarden | Production, multi-machine, audit trails |
 
-**Simple mode:** Configure MCP servers with environment variables or `.env` files. See [Configuration](#configuration) below.
+**Simple mode:** Configure MCP servers with environment variables. See [config.template.json](config/config.template.json).
 
-**Secure mode:** Full secrets management with OpenBao, Bitwarden integration, and SSH tunnels. See [docs/SECURE_SETUP.md](docs/SECURE_SETUP.md).
+**Secure mode:** Full secrets management with OpenBao, Bitwarden integration. See [docs/SECURE_SETUP.md](docs/SECURE_SETUP.md).
 
-For a complete workstation bootstrap (secure mode):
-```bash
-./scripts/bootstrap.sh
-```
-
-## Configuration
-
-### 1. Create config.json
-
-```json
-{
-  "mcpProxy": {
-    "name": "MCP Proxy",
-    "version": "1.0.0",
-    "type": "stdio",
-    "hierarchyPath": "~/.claude/mcp-proxy/hierarchy",
-    "options": {
-      "lazyLoad": true,
-      "preloadAll": true
-    }
-  },
-  "mcpServers": {
-    "your-server": {
-      "transportType": "stdio",
-      "command": "/path/to/.venv/bin/python",
-      "args": ["/path/to/mcp_server.py"],
-      "options": { "lazyLoad": true }
-    }
-  }
-}
-```
-
-**Key options:**
-- `lazyLoad: true` - Progressive tool disclosure (reduces context)
-- `preloadAll: true` - Pre-warm servers in background (eliminates cold start)
-
-### 2. Generate Tool Hierarchy
-
-```bash
-./build/structure_generator --config config.json --output hierarchy/
-```
-
-### 3. Configure Claude Code
+## Claude Code Integration
 
 Add to `~/.claude.json`:
 
@@ -132,26 +181,6 @@ Add to `~/.claude.json`:
 └─────────────────────────────────────────────────────┘
 ```
 
-## Secrets Provider (Optional)
-
-For integrating with secrets managers like OpenBao/HashiCorp Vault:
-
-```json
-{
-  "mcpProxy": {
-    "options": {
-      "secretsProvider": "openbao",
-      "secretsAutoStart": true,
-      "secretsProviderAddr": "http://127.0.0.1:8200"
-    }
-  }
-}
-```
-
-Supported providers: `none` (default), `openbao`, `env`
-
-See [config.template.json](config/config.template.json) for all options.
-
 ## Project Structure
 
 ```
@@ -164,21 +193,33 @@ mcp-proxy/
 │   ├── secrets/           # Secrets provider interface
 │   └── server/            # Proxy server logic
 ├── structure_generator/   # Hierarchy generation tool
-├── config/                # Example configurations
-└── scripts/               # Build & install scripts
+├── config/                # Configuration templates
+│   ├── config.template.json   # Portable template with variables
+│   └── config.local.json      # Your local config (gitignored)
+├── scripts/
+│   ├── bootstrap.sh       # Full workstation setup
+│   └── install.sh         # Binary-only install
+└── docs/
+    └── SECURE_SETUP.md    # OpenBao + Bitwarden guide
 ```
 
 ## Development
 
 ```bash
 # Build
-go build ./...
+make build
 
 # Test
 go test ./...
 
-# Run locally
-./build/mcp-proxy --config config/config.json
+# Deploy binary only (keeps existing config)
+make deploy
+
+# Full install (binary + config from config.local.json)
+make install
+
+# Regenerate hierarchy only
+make generate-hierarchy
 ```
 
 ## Acknowledgments
