@@ -30,10 +30,14 @@ log_section() { echo -e "\n${BLUE}===${NC} $1 ${BLUE}===${NC}"; }
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
+# GitHub URLs for dependencies
+BITWARDEN_GUARD_URL="https://github.com/IAMSamuelRodda/bitwarden-guard.git"
+OPENBAO_AGENTS_URL="https://github.com/IAMSamuelRodda/openbao-agents.git"
+
 # Default paths (can be overridden via environment)
-REPOS_DIR="${REPOS_DIR:-$HOME/repos}"
-BITWARDEN_GUARD_REPO="${BITWARDEN_GUARD_REPO:-$REPOS_DIR/3-resources/bitwarden-guard}"
-OPENBAO_AGENTS_REPO="${OPENBAO_AGENTS_REPO:-$REPOS_DIR/2-areas/openbao-agents}"
+DEPS_DIR="${DEPS_DIR:-$HOME/.claude/deps}"
+BITWARDEN_GUARD_REPO="${BITWARDEN_GUARD_REPO:-$DEPS_DIR/bitwarden-guard}"
+OPENBAO_AGENTS_REPO="${OPENBAO_AGENTS_REPO:-$DEPS_DIR/openbao-agents}"
 MCP_SERVERS_DIR="${MCP_SERVERS_DIR:-$HOME/.claude/mcp-servers}"
 MCP_PROXY_DIR="${MCP_PROXY_DIR:-$HOME/.claude/mcp-proxy}"
 
@@ -75,11 +79,15 @@ install_bitwarden_guard() {
         return 0
     fi
 
+    # Clone if not exists
     if [ ! -d "$BITWARDEN_GUARD_REPO" ]; then
-        log_error "bitwarden-guard repo not found at $BITWARDEN_GUARD_REPO"
-        log_error "Clone it first: git clone https://github.com/IAMSamuelRodda/bitwarden-guard.git $BITWARDEN_GUARD_REPO"
-        FAILED+=("bitwarden-guard")
-        return 1
+        log_info "Cloning bitwarden-guard from GitHub..."
+        mkdir -p "$DEPS_DIR"
+        if ! git clone "$BITWARDEN_GUARD_URL" "$BITWARDEN_GUARD_REPO"; then
+            log_error "Failed to clone bitwarden-guard"
+            FAILED+=("bitwarden-guard")
+            return 1
+        fi
     fi
 
     log_info "Installing bitwarden-guard..."
@@ -104,11 +112,15 @@ install_openbao_agents() {
         return 0
     fi
 
+    # Clone if not exists
     if [ ! -d "$OPENBAO_AGENTS_REPO" ]; then
-        log_error "openbao-agents repo not found at $OPENBAO_AGENTS_REPO"
-        log_error "Clone it first: git clone https://github.com/IAMSamuelRodda/openbao-agents.git $OPENBAO_AGENTS_REPO"
-        FAILED+=("openbao-agents")
-        return 1
+        log_info "Cloning openbao-agents from GitHub..."
+        mkdir -p "$DEPS_DIR"
+        if ! git clone "$OPENBAO_AGENTS_URL" "$OPENBAO_AGENTS_REPO"; then
+            log_error "Failed to clone openbao-agents"
+            FAILED+=("openbao-agents")
+            return 1
+        fi
     fi
 
     log_info "Installing openbao-agents..."
@@ -291,11 +303,16 @@ case "${1:-}" in
         echo "Usage: $0 [OPTIONS]"
         echo ""
         echo "Bootstrap full MCP proxy infrastructure on a new workstation."
+        echo "Dependencies are cloned from GitHub automatically if not present."
+        echo ""
+        echo "GitHub repos:"
+        echo "  bitwarden-guard: $BITWARDEN_GUARD_URL"
+        echo "  openbao-agents:  $OPENBAO_AGENTS_URL"
         echo ""
         echo "Environment variables:"
-        echo "  REPOS_DIR              Base repos directory (default: ~/repos)"
-        echo "  BITWARDEN_GUARD_REPO   bitwarden-guard repo path"
-        echo "  OPENBAO_AGENTS_REPO    openbao-agents repo path"
+        echo "  DEPS_DIR               Dependencies clone directory (default: ~/.claude/deps)"
+        echo "  BITWARDEN_GUARD_REPO   Override bitwarden-guard repo path"
+        echo "  OPENBAO_AGENTS_REPO    Override openbao-agents repo path"
         echo "  MCP_SERVERS_DIR        MCP servers directory (default: ~/.claude/mcp-servers)"
         echo "  MCP_PROXY_DIR          mcp-proxy install directory (default: ~/.claude/mcp-proxy)"
         exit 0
