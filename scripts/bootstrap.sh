@@ -8,8 +8,8 @@
 # 4. mcp-proxy (this project)
 #
 # Flags:
-#   (none)      Full bootstrap - install/update everything
-#   --simple    Simple mode - skip secrets infrastructure (bitwarden-guard, openbao-agents)
+#   (none)      Simple mode - MCP servers + proxy (default)
+#   --secure    Full bootstrap with secrets infrastructure (bitwarden-guard, openbao-agents)
 #   --refresh   Config + hierarchy only (skip source updates)
 #   --force     Clean reinstall of all MCP servers
 
@@ -45,7 +45,7 @@ CONFIG_FILE="$PROJECT_DIR/config/config.local.json"
 
 # Flags
 FORCE_REINSTALL=false
-SIMPLE_MODE=false
+SECURE_MODE=false
 
 # Track results
 INSTALLED=()
@@ -452,14 +452,14 @@ main() {
     echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
-    if [ "$SIMPLE_MODE" = true ]; then
-        echo -e "${YELLOW}Simple mode:${NC} Skipping secrets infrastructure"
+    if [ "$SECURE_MODE" = true ]; then
+        echo -e "${YELLOW}Secure mode:${NC} Including secrets infrastructure"
         echo ""
     fi
 
     check_dependencies
 
-    if [ "$SIMPLE_MODE" = false ]; then
+    if [ "$SECURE_MODE" = true ]; then
         install_bitwarden_guard || true
         install_openbao_agents || true
     fi
@@ -474,11 +474,11 @@ main() {
 show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
-    echo "Bootstrap full MCP proxy infrastructure."
+    echo "Bootstrap MCP proxy infrastructure."
     echo ""
     echo "Options:"
-    echo "  (none)       Full bootstrap - install/update all components"
-    echo "  --simple     Simple mode - skip secrets infrastructure (for .env users)"
+    echo "  (none)       Simple mode - MCP servers + proxy (default)"
+    echo "  --secure     Include secrets infrastructure (bitwarden-guard, openbao-agents)"
     echo "  --refresh    Config + hierarchy only (skip source updates)"
     echo "  --force      Force clean reinstall of all MCP servers"
     echo "  -h, --help   Show this help"
@@ -487,10 +487,10 @@ show_help() {
     echo "Each server can specify a 'source' with type 'git' or 'local'."
     echo ""
     echo "Examples:"
-    echo "  $0               # Full bootstrap (with secrets infrastructure)"
-    echo "  $0 --simple      # Simple mode (MCP servers + proxy only)"
+    echo "  $0               # Simple mode (most users)"
+    echo "  $0 --secure      # With OpenBao/Bitwarden secrets infrastructure"
     echo "  $0 --refresh     # Just update config and hierarchy"
-    echo "  $0 --force       # Reinstall everything fresh"
+    echo "  $0 --force       # Reinstall all MCP servers fresh"
 }
 
 # Parse arguments
@@ -499,8 +499,8 @@ case "${1:-}" in
         show_help
         exit 0
         ;;
-    --simple)
-        SIMPLE_MODE=true
+    --secure)
+        SECURE_MODE=true
         main
         ;;
     --refresh)

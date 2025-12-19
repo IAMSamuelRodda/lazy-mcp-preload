@@ -37,10 +37,7 @@ cd mcp-proxy
 cp config/config.template.json config/config.local.json
 # Edit config.local.json with your MCP servers
 
-# Simple mode (MCP servers + proxy, uses .env files for secrets)
-./scripts/bootstrap.sh --simple
-
-# Or full bootstrap (includes OpenBao/Bitwarden secrets infrastructure)
+# Bootstrap (installs MCP servers + proxy)
 ./scripts/bootstrap.sh
 ```
 
@@ -54,16 +51,16 @@ The bootstrap script orchestrates full workstation setup:
 
 | Flag | Behavior |
 |------|----------|
-| (none) | Full bootstrap: secrets infra → MCP servers → mcp-proxy |
-| `--simple` | Simple mode: skip secrets infrastructure (for `.env` users) |
+| (none) | Default: MCP servers → mcp-proxy |
+| `--secure` | Include secrets infrastructure (bitwarden-guard, openbao-agents) |
 | `--refresh` | Config + hierarchy only (fast, skips source updates) |
 | `--force` | Clean reinstall all MCP servers from source |
 
 **What it installs:**
-1. **bitwarden-guard** - Bitwarden CLI session management (optional)
-2. **openbao-agents** - Local secrets agents (optional)
-3. **MCP servers** - From source definitions in config
-4. **mcp-proxy** - This proxy binary + hierarchy
+1. **MCP servers** - From source definitions in config
+2. **mcp-proxy** - This proxy binary + hierarchy
+3. **bitwarden-guard** - Bitwarden CLI session management (with `--secure`)
+4. **openbao-agents** - Local secrets agents (with `--secure`)
 
 ## Configuration
 
