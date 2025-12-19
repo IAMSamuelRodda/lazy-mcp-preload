@@ -37,7 +37,10 @@ cd mcp-proxy
 cp config/config.template.json config/config.local.json
 # Edit config.local.json with your MCP servers
 
-# Full bootstrap (installs everything)
+# Simple mode (MCP servers + proxy, uses .env files for secrets)
+./scripts/bootstrap.sh --simple
+
+# Or full bootstrap (includes OpenBao/Bitwarden secrets infrastructure)
 ./scripts/bootstrap.sh
 ```
 
@@ -51,7 +54,8 @@ The bootstrap script orchestrates full workstation setup:
 
 | Flag | Behavior |
 |------|----------|
-| (none) | Full bootstrap: deps → git pull → venv check → build → deploy → hierarchy |
+| (none) | Full bootstrap: secrets infra → MCP servers → mcp-proxy |
+| `--simple` | Simple mode: skip secrets infrastructure (for `.env` users) |
 | `--refresh` | Config + hierarchy only (fast, skips source updates) |
 | `--force` | Clean reinstall all MCP servers from source |
 

@@ -9,6 +9,7 @@
 #
 # Flags:
 #   (none)      Full bootstrap - install/update everything
+#   --simple    Simple mode - skip secrets infrastructure (bitwarden-guard, openbao-agents)
 #   --refresh   Config + hierarchy only (skip source updates)
 #   --force     Clean reinstall of all MCP servers
 
@@ -44,6 +45,7 @@ CONFIG_FILE="$PROJECT_DIR/config/config.local.json"
 
 # Flags
 FORCE_REINSTALL=false
+SIMPLE_MODE=false
 
 # Track results
 INSTALLED=()
@@ -450,10 +452,18 @@ main() {
     echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
+    if [ "$SIMPLE_MODE" = true ]; then
+        echo -e "${YELLOW}Simple mode:${NC} Skipping secrets infrastructure"
+        echo ""
+    fi
+
     check_dependencies
 
-    install_bitwarden_guard || true
-    install_openbao_agents || true
+    if [ "$SIMPLE_MODE" = false ]; then
+        install_bitwarden_guard || true
+        install_openbao_agents || true
+    fi
+
     install_mcp_servers || true
     install_mcp_proxy || true
 
@@ -468,6 +478,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  (none)       Full bootstrap - install/update all components"
+    echo "  --simple     Simple mode - skip secrets infrastructure (for .env users)"
     echo "  --refresh    Config + hierarchy only (skip source updates)"
     echo "  --force      Force clean reinstall of all MCP servers"
     echo "  -h, --help   Show this help"
@@ -476,7 +487,8 @@ show_help() {
     echo "Each server can specify a 'source' with type 'git' or 'local'."
     echo ""
     echo "Examples:"
-    echo "  $0               # Full bootstrap"
+    echo "  $0               # Full bootstrap (with secrets infrastructure)"
+    echo "  $0 --simple      # Simple mode (MCP servers + proxy only)"
     echo "  $0 --refresh     # Just update config and hierarchy"
     echo "  $0 --force       # Reinstall everything fresh"
 }
@@ -486,6 +498,10 @@ case "${1:-}" in
     -h|--help)
         show_help
         exit 0
+        ;;
+    --simple)
+        SIMPLE_MODE=true
+        main
         ;;
     --refresh)
         refresh_only
