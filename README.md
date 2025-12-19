@@ -37,6 +37,22 @@ cd mcp-proxy
 go build -o build/mcp-proxy ./cmd/mcp-proxy
 ```
 
+## Setup Options
+
+| Mode | Secrets Storage | Best For |
+|------|-----------------|----------|
+| **Simple** | `.env` files per server | Local dev, single machine |
+| **Secure** | OpenBao + Bitwarden | Production, multi-machine, audit trails |
+
+**Simple mode:** Configure MCP servers with environment variables or `.env` files. See [Configuration](#configuration) below.
+
+**Secure mode:** Full secrets management with OpenBao, Bitwarden integration, and SSH tunnels. See [docs/SECURE_SETUP.md](docs/SECURE_SETUP.md).
+
+For a complete workstation bootstrap (secure mode):
+```bash
+./scripts/bootstrap.sh
+```
+
 ## Configuration
 
 ### 1. Create config.json
