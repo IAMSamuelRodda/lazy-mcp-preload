@@ -175,6 +175,7 @@ import sys
 
 config_path = "$CLAUDE_JSON"
 lazy_mcp_dir = "$MCP_PROXY_DIR"
+proxy_config_path = "$MCP_PROXY_DIR/config.json"
 
 try:
     with open(config_path, 'r') as f:
@@ -186,6 +187,30 @@ except json.JSONDecodeError as e:
 # Ensure mcpServers exists
 if 'mcpServers' not in config:
     config['mcpServers'] = {}
+
+# Check if any existing servers should be moved to mcp-proxy config
+existing_servers = [s for s in config['mcpServers'].keys() if s != 'mcp-proxy']
+if existing_servers:
+    print(f"⚠️  WARNING: Found {len(existing_servers)} existing MCP server(s) in ~/.claude.json:")
+    for server in existing_servers:
+        print(f"    - {server}")
+    print()
+    print("These should be configured in mcp-proxy config instead.")
+    print(f"Check: {proxy_config_path}")
+    print()
+
+    # Ask user if they want to keep only mcp-proxy
+    response = input("Remove these servers and keep ONLY mcp-proxy? [y/N]: ").strip().lower()
+    if response in ['y', 'yes']:
+        # Keep only mcp-proxy
+        removed_servers = existing_servers
+        config['mcpServers'] = {}
+        print(f"✓ Removed {len(removed_servers)} server(s) from ~/.claude.json")
+        print("  (They should be configured in mcp-proxy config)")
+    else:
+        print("Keeping existing servers alongside mcp-proxy")
+        print("⚠️  WARNING: This will cause duplicate connections!")
+        print("   Manually remove servers from ~/.claude.json after migrating to proxy.")
 
 # Add mcp-proxy
 config['mcpServers']['mcp-proxy'] = {

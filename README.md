@@ -192,7 +192,13 @@ Add to `~/.claude.json`:
 }
 ```
 
-**Important:** Remove individual MCP server entries - the proxy handles them.
+> **⚠️ CRITICAL:** Your `~/.claude.json` should contain **ONLY** the `mcp-proxy` entry above.
+>
+> Remove all other MCP server entries (cloudflare, joplin, etc.) - the proxy handles them.
+>
+> Having both direct servers AND mcp-proxy causes duplicate connections and wasted context.
+>
+> The install script will detect this and prompt you to clean up automatically.
 
 ## Architecture
 
